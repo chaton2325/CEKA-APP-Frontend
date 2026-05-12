@@ -7,6 +7,7 @@ import '../providers/auth_provider.dart';
 import '../utils/constants.dart';
 import '../models/media.dart';
 import '../widgets/comment_bottom_sheet.dart';
+import '../widgets/media_grid.dart';
 
 class PostDetailScreen extends StatefulWidget {
   final int postId;
@@ -102,14 +103,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             if (_post!.media.isNotEmpty) ...[
               const SizedBox(height: 16),
               if (_post!.media.any((m) => m.mediaType == MediaType.image))
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.network(
-                    '${AppConstants.baseUrl}${_post!.media.firstWhere((m) => m.mediaType == MediaType.image).url}',
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                ),
+                MediaGrid(media: _post!.media, showAll: true),
               const SizedBox(height: 12),
               ..._post!.media.where((m) => m.mediaType != MediaType.image).map((m) => Container(
                 margin: const EdgeInsets.only(bottom: 8),

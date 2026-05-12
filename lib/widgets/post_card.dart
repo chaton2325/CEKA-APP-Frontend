@@ -9,6 +9,7 @@ import '../providers/auth_provider.dart';
 import '../models/media.dart';
 import '../screens/edit_post_screen.dart';
 import 'comment_bottom_sheet.dart';
+import 'media_grid.dart';
 
 class PostCard extends StatelessWidget {
   final Post post;
@@ -155,23 +156,9 @@ class PostCard extends StatelessWidget {
                   ),
                 ),
               if (post.media.isNotEmpty) ...[
-                if (post.media.any((m) => m.mediaType == MediaType.image))
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.network(
-                      '${AppConstants.baseUrl}${post.media.firstWhere((m) => m.mediaType == MediaType.image).url}',
-                      height: 240,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        height: 240,
-                        color: colorScheme.surfaceVariant,
-                        child: const Icon(Icons.broken_image),
-                      ),
-                    ),
-                  ),
+                MediaGrid(media: post.media),
                 const SizedBox(height: 12),
-                // Display other media as compact chips
+                // Display non-image media as compact chips
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,

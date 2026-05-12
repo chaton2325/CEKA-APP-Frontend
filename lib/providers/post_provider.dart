@@ -7,23 +7,39 @@ import '../services/api_service.dart';
 
 class PostProvider with ChangeNotifier {
   final ApiService _apiService;
+  static const int postsPageSize = 10;
+
   List<Post> _posts = [];
+  List<Post> _localBacklog = [];
   bool _isLoading = false;
+  bool _isLoadingMore = false;
+  bool _hasMorePosts = true;
+  int _currentPage = 0;
 
   PostProvider(this._apiService);
 
   List<Post> get posts => _posts;
   bool get isLoading => _isLoading;
+  bool get isLoadingMore => _isLoadingMore;
+  bool get hasMorePosts => _hasMorePosts;
 
   Future<void> fetchPosts() async {
     _isLoading = true;
+    _hasMorePosts = true;
+    _currentPage = 0;
+    _localBacklog = [];
     notifyListeners();
 
     try {
-      final response = await _apiService.getPosts();
+      final response = await _apiService.getPosts(page: 1, limit: postsPageSize);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        _posts = (data['posts'] as List).map((p) => Post.fromJson(p)).toList();
+        final fetchedPosts = (data['posts'] as List).map((p) => Post.fromJson(p)).toList();
+        final isServerPaginated = _hasPaginationMetadata(data) || fetchedPosts.length <= postsPageSize;
+        _posts = isServerPaginated ? fetchedPosts : fetchedPosts.take(postsPageSize).toList();
+        _localBacklog = isServerPaginated ? [] : fetchedPosts.skip(postsPageSize).toList();
+        _currentPage = 1;
+        _hasMorePosts = _localBacklog.isNotEmpty || _readHasMore(data, fetchedPosts.length);
       }
     } catch (e) {
       debugPrint('Fetch posts error: $e');
@@ -31,6 +47,74 @@ class PostProvider with ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  Future<void> fetchMorePosts() async {
+    if (_isLoading || _isLoadingMore || !_hasMorePosts) return;
+
+    if (_localBacklog.isNotEmpty) {
+      final nextPosts = _localBacklog.take(postsPageSize).toList();
+      _localBacklog = _localBacklog.skip(postsPageSize).toList();
+      _posts.addAll(nextPosts);
+      _hasMorePosts = _localBacklog.isNotEmpty;
+      notifyListeners();
+      return;
+    }
+
+    _isLoadingMore = true;
+    notifyListeners();
+
+    try {
+      final nextPage = _currentPage + 1;
+      final response = await _apiService.getPosts(page: nextPage, limit: postsPageSize);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final fetchedPosts = (data['posts'] as List).map((p) => Post.fromJson(p)).toList();
+        final existingIds = _posts.map((post) => post.id).toSet();
+        final newPosts = fetchedPosts.where((post) => !existingIds.contains(post.id)).toList();
+
+        _posts.addAll(newPosts);
+        _currentPage = nextPage;
+        _hasMorePosts = _readHasMore(data, fetchedPosts.length) && newPosts.isNotEmpty;
+      }
+    } catch (e) {
+      debugPrint('Fetch more posts error: $e');
+    }
+
+    _isLoadingMore = false;
+    notifyListeners();
+  }
+
+  bool _readHasMore(Map<String, dynamic> data, int fetchedCount) {
+    final pagination = data['pagination'];
+    if (pagination is Map<String, dynamic>) {
+      final hasNext = pagination['has_next'] ?? pagination['hasNext'];
+      if (hasNext is bool) return hasNext;
+
+      final page = pagination['page'];
+      final pages = pagination['pages'] ?? pagination['total_pages'] ?? pagination['totalPages'];
+      if (page is int && pages is int) return page < pages;
+    }
+
+    final hasNext = data['has_next'] ?? data['hasNext'];
+    if (hasNext is bool) return hasNext;
+
+    final page = data['page'];
+    final pages = data['pages'] ?? data['total_pages'] ?? data['totalPages'];
+    if (page is int && pages is int) return page < pages;
+
+    return fetchedCount == postsPageSize;
+  }
+
+  bool _hasPaginationMetadata(Map<String, dynamic> data) {
+    if (data['pagination'] is Map<String, dynamic>) return true;
+
+    return data.containsKey('has_next') ||
+        data.containsKey('hasNext') ||
+        data.containsKey('page') ||
+        data.containsKey('pages') ||
+        data.containsKey('total_pages') ||
+        data.containsKey('totalPages');
   }
 
   Future<bool> createPost(String? content, {List<File>? mediaFiles}) async {

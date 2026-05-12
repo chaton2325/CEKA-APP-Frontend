@@ -89,9 +89,15 @@ class ApiService {
     return response;
   }
 
-  Future<http.Response> getPosts() async {
+  Future<http.Response> getPosts({int? page, int? limit}) async {
+    final uri = Uri.parse('${AppConstants.baseUrl}/posts').replace(
+      queryParameters: {
+        if (page != null) 'page': page.toString(),
+        if (limit != null) 'limit': limit.toString(),
+      },
+    );
     final response = await http.get(
-      Uri.parse('${AppConstants.baseUrl}/posts'),
+      uri,
       headers: _headers,
     );
     return response;
