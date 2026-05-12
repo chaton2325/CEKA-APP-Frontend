@@ -72,14 +72,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_user == null) return const Scaffold(body: Center(child: Text('Utilisateur non trouvé')));
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             pinned: true,
             elevation: 0,
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.black,
+            backgroundColor: colorScheme.surface,
+            foregroundColor: const Color(0xFF102118),
             centerTitle: true,
             title: Text(
               _user!.username,
@@ -94,77 +94,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     MaterialPageRoute(builder: (context) => const EditProfileScreen()),
                   ),
                 ),
+              if (isMe)
+                IconButton(
+                  tooltip: 'Déconnexion',
+                  icon: const Icon(Icons.logout_rounded),
+                  onPressed: () => authProvider.logout(),
+                ),
             ],
           ),
           SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      height: 180,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary,
-                        image: _user!.bannerPhotoUrl != null
-                            ? DecorationImage(
-                                image: NetworkImage('${AppConstants.baseUrl}${_user!.bannerPhotoUrl}'),
-                                fit: BoxFit.cover,
-                              )
-                            : null,
-                      ),
-                      child: _user!.bannerPhotoUrl == null
-                          ? Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.bottomLeft,
-                                  end: Alignment.topRight,
-                                  colors: [colorScheme.primary, colorScheme.primaryContainer],
-                                ),
-                              ),
-                            )
-                          : null,
-                    ),
-                    Positioned(
-                      bottom: -45,
-                      left: 20,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: CircleAvatar(
-                          radius: 46,
-                          backgroundColor: colorScheme.surfaceContainerHighest,
-                          backgroundImage: _user!.profilePhotoUrl != null
-                              ? NetworkImage('${AppConstants.baseUrl}${_user!.profilePhotoUrl}')
-                              : null,
-                          child: _user!.profilePhotoUrl == null 
-                              ? Icon(Icons.person, size: 40, color: colorScheme.primary) 
-                              : null,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.only(right: 20, top: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      _StatItem(label: 'Posts', value: '${_userPosts.length}'),
-                      const SizedBox(width: 30),
-                      _StatItem(label: 'Likes', value: '$totalLikes'),
-                    ],
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: 1),
+              duration: const Duration(milliseconds: 420),
+              curve: Curves.easeOutCubic,
+              builder: (context, value, child) {
+                return Opacity(
+                  opacity: value,
+                  child: Transform.translate(
+                    offset: Offset(0, 18 * (1 - value)),
+                    child: child,
                   ),
-                ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                );
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _ProfileHeader(user: _user!, postsCount: _userPosts.length, totalLikes: totalLikes),
+                  const SizedBox(height: 18),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -182,9 +140,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: colorScheme.primary.withOpacity(0.05),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: colorScheme.primary.withOpacity(0.1)),
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: colorScheme.primary.withOpacity(0.10)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: colorScheme.primary.withOpacity(0.06),
+                                blurRadius: 16,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
                           ),
                           child: Text(
                             _user!.bio!,
@@ -203,7 +168,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          Icon(Icons.calendar_today_rounded, size: 16, color: colorScheme.secondary),
+                          Icon(Icons.calendar_today_rounded, size: 16, color: colorScheme.primary),
                           const SizedBox(width: 8),
                           Text(
                             _user!.createdAt != null
@@ -214,55 +179,94 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ],
                       ),
                       const SizedBox(height: 24),
-                      const Divider(),
+                      Divider(color: colorScheme.primary.withOpacity(0.10)),
                       const SizedBox(height: 16),
-                      Text(
-                        isMe ? 'Mes Publications' : 'Publications',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      Row(
+                        children: [
+                          Icon(Icons.article_rounded, color: colorScheme.primary, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            isMe ? 'Mes Publications' : 'Publications',
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 16),
                     ],
                   ),
                 ),
               ],
+              ),
             ),
           ),
           if (_userPosts.isEmpty)
-            const SliverToBoxAdapter(
-              child: Center(child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 40),
-                child: Text('Aucune publication pour le moment'),
-              )),
+            SliverToBoxAdapter(
+              child: Center(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: colorScheme.primary.withOpacity(0.10)),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.eco_rounded, color: colorScheme.primary, size: 30),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Aucune publication pour le moment',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             )
           else
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
-                  (context, index) => PostCard(post: _userPosts[index]),
+                  (context, index) => _AnimatedProfilePostItem(
+                    index: index,
+                    child: PostCard(post: _userPosts[index]),
+                  ),
                   childCount: _userPosts.length,
                 ),
               ),
             ),
-          if (isMe)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: ElevatedButton.icon(
-                  onPressed: () => authProvider.logout(),
-                  icon: const Icon(Icons.logout_rounded),
-                  label: const Text('Déconnexion'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red[50],
-                    foregroundColor: Colors.red,
-                    elevation: 0,
-                  ),
-                ),
-              ),
-            ),
-          const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          const SliverToBoxAdapter(child: SizedBox(height: 130)),
         ],
       ),
+    );
+  }
+}
+
+class _AnimatedProfilePostItem extends StatelessWidget {
+  final int index;
+  final Widget child;
+
+  const _AnimatedProfilePostItem({required this.index, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      key: ValueKey(index),
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 250 + (index % 5) * 35),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 16 * (1 - value)),
+            child: child,
+          ),
+        );
+      },
+      child: child,
     );
   }
 }
@@ -275,11 +279,167 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 11)),
-      ],
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      width: 76,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colorScheme.primary.withOpacity(0.10)),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.primary.withOpacity(0.10),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Text(value, style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.w900, fontSize: 17)),
+          const SizedBox(height: 2),
+          Text(label, style: TextStyle(color: colorScheme.secondary.withOpacity(0.75), fontSize: 11)),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileHeader extends StatelessWidget {
+  final User user;
+  final int postsCount;
+  final int totalLikes;
+
+  const _ProfileHeader({
+    required this.user,
+    required this.postsCount,
+    required this.totalLikes,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return SizedBox(
+      height: 286,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            top: 8,
+            left: 16,
+            right: 16,
+            child: Container(
+              height: 210,
+              decoration: BoxDecoration(
+                color: colorScheme.primary,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: colorScheme.primary.withOpacity(0.18),
+                    blurRadius: 26,
+                    offset: const Offset(0, 14),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (user.bannerPhotoUrl != null)
+                      Image.network(
+                        '${AppConstants.baseUrl}${user.bannerPhotoUrl}',
+                        fit: BoxFit.cover,
+                      )
+                    else
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.bottomLeft,
+                            end: Alignment.topRight,
+                            colors: [
+                              colorScheme.primary,
+                              const Color(0xFF59B36D),
+                            ],
+                          ),
+                        ),
+                      ),
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                          colors: [
+                            const Color(0xFF102118).withOpacity(0.66),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: 18,
+                      right: 18,
+                      bottom: 24,
+                      child: Text(
+                        user.username,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 34,
+            top: 164,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.12),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: CircleAvatar(
+                radius: 48,
+                backgroundColor: colorScheme.surfaceVariant,
+                backgroundImage: user.profilePhotoUrl != null
+                    ? NetworkImage('${AppConstants.baseUrl}${user.profilePhotoUrl}')
+                    : null,
+                child: user.profilePhotoUrl == null
+                    ? Icon(Icons.person, size: 42, color: colorScheme.primary)
+                    : null,
+              ),
+            ),
+          ),
+          Positioned(
+            right: 30,
+            top: 218,
+            child: Row(
+              children: [
+                _StatItem(label: 'Posts', value: '$postsCount'),
+                const SizedBox(width: 10),
+                _StatItem(label: 'Likes', value: '$totalLikes'),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

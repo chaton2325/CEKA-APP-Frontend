@@ -51,27 +51,36 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       extendBody: true, // Important for floating nav bar
-      body: _pages[_currentIndex],
+      backgroundColor: colorScheme.surface,
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 260),
+        switchInCurve: Curves.easeOutCubic,
+        switchOutCurve: Curves.easeInCubic,
+        child: KeyedSubtree(
+          key: ValueKey(_currentIndex),
+          child: _pages[_currentIndex],
+        ),
+      ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(30),
+            color: Colors.white.withOpacity(0.96),
+            borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
+                color: colorScheme.primary.withOpacity(0.14),
+                blurRadius: 24,
+                offset: const Offset(0, 12),
               ),
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(24),
             child: NavigationBar(
-              backgroundColor: Colors.white,
+              backgroundColor: Colors.white.withOpacity(0.96),
               elevation: 0,
-              indicatorColor: colorScheme.primary.withOpacity(0.15),
+              indicatorColor: colorScheme.primary.withOpacity(0.14),
               selectedIndex: _currentIndex,
               onDestinationSelected: (index) {
                 if (index == 3) {
@@ -118,7 +127,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               backgroundColor: colorScheme.primary,
               foregroundColor: Colors.white,
-              shape: const CircleBorder(),
+              elevation: 4,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
               child: const Icon(Icons.add_rounded),
             )
           : null,
@@ -168,7 +178,9 @@ class _FeedPageState extends State<_FeedPage> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
+        backgroundColor: colorScheme.surface,
         title: const Text('CEKA'),
         actions: [
           IconButton(
@@ -194,20 +206,124 @@ class _FeedPageState extends State<_FeedPage> {
             ? const Center(child: CircularProgressIndicator())
             : ListView.builder(
                 controller: _scrollController,
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 100), // Added padding for floating nav bar
-                itemCount: postProvider.posts.length + (postProvider.isLoadingMore ? 1 : 0),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 140),
+                itemCount: postProvider.posts.length + 1 + (postProvider.isLoadingMore ? 1 : 0),
                 itemBuilder: (context, index) {
-                  if (index >= postProvider.posts.length) {
+                  if (index == 0) {
+                    return const _FeedHeader();
+                  }
+
+                  final postIndex = index - 1;
+                  if (postIndex >= postProvider.posts.length) {
                     return const Padding(
                       padding: EdgeInsets.symmetric(vertical: 16),
                       child: Center(child: CircularProgressIndicator()),
                     );
                   }
 
-                  return PostCard(post: postProvider.posts[index]);
+                  return _AnimatedPostItem(
+                    index: postIndex,
+                    child: PostCard(post: postProvider.posts[postIndex]),
+                  );
                 },
               ),
       ),
+    );
+  }
+}
+
+class _FeedHeader extends StatelessWidget {
+  const _FeedHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 420),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 14 * (1 - value)),
+            child: child,
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: colorScheme.primary,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.primary.withOpacity(0.18),
+              blurRadius: 24,
+              offset: const Offset(0, 12),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.16),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.eco_rounded, color: Colors.white),
+            ),
+            const SizedBox(width: 14),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Fil communautaire',
+                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800),
+                  ),
+                  SizedBox(height: 3),
+                  Text(
+                    'Actualites, medias et conversations CEKA',
+                    style: TextStyle(color: Color(0xDFFFFFFF), fontSize: 13, fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AnimatedPostItem extends StatelessWidget {
+  final int index;
+  final Widget child;
+
+  const _AnimatedPostItem({required this.index, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      key: ValueKey(index),
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 260 + (index % 6) * 35),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 18 * (1 - value)),
+            child: child,
+          ),
+        );
+      },
+      child: child,
     );
   }
 }

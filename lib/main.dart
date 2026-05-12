@@ -36,22 +36,23 @@ class MyApp extends StatelessWidget {
             theme: ThemeData(
               useMaterial3: true,
               colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color(0xFF2E7D32),
-                primary: const Color(0xFF2E7D32),
-                secondary: const Color(0xFF795548),
-                surface: const Color(0xFFF5F5F5),
+                seedColor: const Color(0xFF1B8F4D),
+                primary: const Color(0xFF1B8F4D),
+                secondary: const Color(0xFF37624A),
+                surface: const Color(0xFFF2F7F3),
+                surfaceVariant: const Color(0xFFE3EFE7),
                 onPrimary: Colors.white,
                 onSecondary: Colors.white,
                 onSurface: Colors.black,
               ),
-              scaffoldBackgroundColor: const Color(0xFFF5F5F5),
+              scaffoldBackgroundColor: const Color(0xFFF2F7F3),
               appBarTheme: const AppBarTheme(
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
+                backgroundColor: Color(0xFFF2F7F3),
+                foregroundColor: Color(0xFF102118),
                 elevation: 0,
                 centerTitle: true,
                 titleTextStyle: TextStyle(
-                  color: Colors.black,
+                  color: Color(0xFF102118),
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -75,11 +76,11 @@ class MyApp extends StatelessWidget {
               ),
               elevatedButtonTheme: ElevatedButtonThemeData(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2E7D32),
+                  backgroundColor: const Color(0xFF1B8F4D),
                   foregroundColor: Colors.white,
                   minimumSize: const Size.fromHeight(56),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   elevation: 2,
                   textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -87,9 +88,9 @@ class MyApp extends StatelessWidget {
               ),
               cardTheme: CardThemeData(
                 color: Colors.white,
-                elevation: 1,
+                elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
             ),

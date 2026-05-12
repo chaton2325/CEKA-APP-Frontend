@@ -24,20 +24,21 @@ class PostCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colorScheme.primary.withOpacity(0.08)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: colorScheme.primary.withOpacity(0.07),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(8),
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => PostDetailScreen(postId: post.id)),
@@ -52,7 +53,7 @@ class PostCard extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: colorScheme.primary.withOpacity(0.2), width: 2),
+                      border: Border.all(color: colorScheme.primary.withOpacity(0.28), width: 2),
                     ),
                     child: CircleAvatar(
                       radius: 22,
@@ -76,7 +77,7 @@ class PostCard extends StatelessWidget {
                         ),
                         Text(
                           DateFormat.yMMMd().add_jm().format(post.createdAt),
-                          style: TextStyle(color: colorScheme.secondary.withOpacity(0.7), fontSize: 12),
+                          style: TextStyle(color: colorScheme.secondary.withOpacity(0.68), fontSize: 12),
                         ),
                       ],
                     ),
@@ -165,8 +166,8 @@ class PostCard extends StatelessWidget {
                   children: post.media.where((m) => m.mediaType != MediaType.image).map((m) => Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: colorScheme.secondary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
+                      color: colorScheme.primary.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -174,12 +175,12 @@ class PostCard extends StatelessWidget {
                         Icon(
                           m.mediaType == MediaType.video ? Icons.videocam_rounded : Icons.audiotrack_rounded,
                           size: 16,
-                          color: colorScheme.secondary,
+                          color: colorScheme.primary,
                         ),
                         const SizedBox(width: 6),
                         Text(
                           m.filename,
-                          style: TextStyle(fontSize: 12, color: colorScheme.secondary, fontWeight: FontWeight.w500),
+                          style: TextStyle(fontSize: 12, color: colorScheme.primary, fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),
@@ -187,7 +188,7 @@ class PostCard extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: 16),
-              const Divider(height: 1),
+              Divider(height: 1, color: colorScheme.primary.withOpacity(0.08)),
               const SizedBox(height: 8),
               Row(
                 children: [
