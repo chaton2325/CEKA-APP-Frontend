@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/post_provider.dart';
+import 'providers/notification_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/register_screen.dart';
@@ -21,6 +22,10 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProxyProvider<AuthProvider, PostProvider>(
           create: (context) => PostProvider(Provider.of<AuthProvider>(context, listen: false).apiService),
           update: (context, auth, previous) => PostProvider(auth.apiService),
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, NotificationProvider>(
+          create: (context) => NotificationProvider(Provider.of<AuthProvider>(context, listen: false).apiService),
+          update: (context, auth, previous) => NotificationProvider(auth.apiService),
         ),
       ],
       child: Consumer<AuthProvider>(

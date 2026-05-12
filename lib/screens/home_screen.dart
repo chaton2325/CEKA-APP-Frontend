@@ -5,6 +5,9 @@ import '../providers/auth_provider.dart';
 import '../widgets/post_card.dart';
 import 'create_post_screen.dart';
 import 'profile_screen.dart';
+import 'notification_screen.dart';
+import '../providers/notification_provider.dart';
+import '../widgets/user_search_delegate.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<PostProvider>(context, listen: false).fetchPosts();
+      Provider.of<NotificationProvider>(context, listen: false).fetchNotifications();
     });
   }
 
@@ -39,8 +43,46 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none_rounded),
-            onPressed: () {},
+            icon: const Icon(Icons.search_rounded),
+            onPressed: () {
+              showSearch(
+                context: context,
+                delegate: UserSearchDelegate(Provider.of<AuthProvider>(context, listen: false).apiService),
+              );
+            },
+          ),
+          Consumer<NotificationProvider>(
+            builder: (context, notificationProvider, _) {
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications_none_rounded),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const NotificationScreen()),
+                    ),
+                  ),
+                  if (notificationProvider.unreadCount > 0)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                        child: Text(
+                          '${notificationProvider.unreadCount}',
+                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
           IconButton(
             icon: const Icon(Icons.person_outline_rounded),
@@ -52,7 +94,12 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () => postProvider.fetchPosts(),
+        onRefresh: () async {
+          await postProvider.fetchPosts();
+          if (mounted) {
+            await Provider.of<NotificationProvider>(context, listen: false).fetchNotifications();
+          }
+        },
         color: colorScheme.primary,
         child: postProvider.isLoading && postProvider.posts.isEmpty
             ? const Center(child: CircularProgressIndicator())

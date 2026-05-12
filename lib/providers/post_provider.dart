@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../models/post.dart';
-import '../models/comment.dart';
 import '../services/api_service.dart';
 
 class PostProvider with ChangeNotifier {
@@ -45,7 +44,11 @@ class PostProvider with ChangeNotifier {
       }
       
       if (response.statusCode == 201) {
-        await fetchPosts();
+        final data = jsonDecode(response.body);
+        final newPost = Post.fromJson(data['post']);
+        // Insert at the beginning for immediate visibility
+        _posts.insert(0, newPost);
+        notifyListeners();
         return true;
       }
     } catch (e) {
@@ -67,7 +70,30 @@ class PostProvider with ChangeNotifier {
     return null;
   }
 
-  Future<void> togglePostLike(int postId, bool currentlyLiked) async {
+  Future<void> togglePostLike(int postId, bool currentlyLiked, {int? userId}) async {
+    // Optimistic update
+    final index = _posts.indexWhere((p) => p.id == postId);
+    Post? originalPost;
+    if (index != -1) {
+      originalPost = _posts[index];
+      // Create a temporary updated post for the UI
+      // Note: This is a simplified version, ideally we'd update likedBy and likesCount properly
+      _posts[index] = Post(
+        id: originalPost.id,
+        content: originalPost.content,
+        author: originalPost.author,
+        media: originalPost.media,
+        likesCount: currentlyLiked ? originalPost.likesCount - 1 : originalPost.likesCount + 1,
+        likedBy: currentlyLiked 
+          ? originalPost.likedBy.where((u) => u.id != userId).toList()
+          : [...originalPost.likedBy, if (userId != null) originalPost.author], // Dummy user for UI
+        comments: originalPost.comments,
+        createdAt: originalPost.createdAt,
+        updatedAt: originalPost.updatedAt,
+      );
+      notifyListeners();
+    }
+
     try {
       final response = currentlyLiked
           ? await _apiService.unlikePost(postId)
@@ -77,15 +103,76 @@ class PostProvider with ChangeNotifier {
         final data = jsonDecode(response.body);
         final updatedPost = Post.fromJson(data['post']);
         
+        if (index != -1) {
+          _posts[index] = updatedPost;
+          notifyListeners();
+        }
+      } else if (originalPost != null && index != -1) {
+        // Rollback on failure
+        _posts[index] = originalPost;
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('Toggle post like error: $e');
+      if (originalPost != null && index != -1) {
+        _posts[index] = originalPost;
+        notifyListeners();
+      }
+    }
+  }
+
+  Future<List<Post>> fetchUserPosts(int userId) async {
+    try {
+      final response = await _apiService.getUserPosts(userId);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return (data['posts'] as List).map((p) => Post.fromJson(p)).toList();
+      }
+    } catch (e) {
+      debugPrint('Fetch user posts error: $e');
+    }
+    return [];
+  }
+
+  Future<bool> updatePost(int postId, {String? content, List<File>? mediaFiles, bool? replaceMedia}) async {
+    try {
+      final baseResponse = await _apiService.updatePost(postId, content: content, mediaFiles: mediaFiles, replaceMedia: replaceMedia);
+      http.Response response;
+      if (baseResponse is http.StreamedResponse) {
+        response = await http.Response.fromStream(baseResponse);
+      } else {
+        response = baseResponse as http.Response;
+      }
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final updatedPost = Post.fromJson(data['post']);
+        
         final index = _posts.indexWhere((p) => p.id == postId);
         if (index != -1) {
           _posts[index] = updatedPost;
           notifyListeners();
         }
+        return true;
       }
     } catch (e) {
-      debugPrint('Toggle post like error: $e');
+      debugPrint('Update post error: $e');
     }
+    return false;
+  }
+
+  Future<bool> deletePost(int postId) async {
+    try {
+      final response = await _apiService.deletePost(postId);
+      if (response.statusCode == 200) {
+        _posts.removeWhere((p) => p.id == postId);
+        notifyListeners();
+        return true;
+      }
+    } catch (e) {
+      debugPrint('Delete post error: $e');
+    }
+    return false;
   }
 
   Future<bool> addComment(int postId, String content, {int? parentId}) async {

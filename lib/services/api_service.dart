@@ -205,6 +205,114 @@ class ApiService {
     return response;
   }
 
+  Future<http.Response> getUserPosts(int userId) async {
+    final response = await http.get(
+      Uri.parse('${AppConstants.baseUrl}/users/$userId/posts'),
+      headers: _headers,
+    );
+    return response;
+  }
+
+  Future<http.BaseResponse> updatePost(
+    int postId, {
+    String? content,
+    List<File>? mediaFiles,
+    bool? replaceMedia,
+  }) async {
+    // If no media, use JSON as supported by the schema
+    if (mediaFiles == null || mediaFiles.isEmpty) {
+      return await http.patch(
+        Uri.parse('${AppConstants.baseUrl}/posts/$postId'),
+        headers: _headers,
+        body: jsonEncode({
+          if (content != null) 'content': content,
+          if (replaceMedia != null) 'replace_media': replaceMedia,
+        }),
+      );
+    }
+
+    final request = http.MultipartRequest(
+      'PATCH',
+      Uri.parse('${AppConstants.baseUrl}/posts/$postId'),
+    );
+
+    if (_token != null) {
+      request.headers['Authorization'] = 'Bearer $_token';
+    }
+
+    if (content != null) request.fields['content'] = content;
+    if (replaceMedia != null) {
+      request.fields['replace_media'] = replaceMedia.toString();
+    }
+
+    for (var file in mediaFiles) {
+      final mimeType = lookupMimeType(file.path) ?? 'application/octet-stream';
+      final typeSplit = mimeType.split('/');
+
+      final stream = http.ByteStream(file.openRead());
+      final length = await file.length();
+      final multipartFile = http.MultipartFile(
+        'media',
+        stream,
+        length,
+        filename: basename(file.path),
+        contentType: MediaType(typeSplit[0], typeSplit[1]),
+      );
+      request.files.add(multipartFile);
+    }
+
+    return await request.send();
+  }
+
+  Future<http.Response> deletePost(int postId) async {
+    final response = await http.delete(
+      Uri.parse('${AppConstants.baseUrl}/posts/$postId'),
+      headers: _headers,
+    );
+    return response;
+  }
+
+  Future<http.Response> getNotifications({bool? unreadOnly}) async {
+    final uri = Uri.parse('${AppConstants.baseUrl}/notifications').replace(
+      queryParameters: unreadOnly != null ? {'unread_only': unreadOnly.toString()} : null,
+    );
+    final response = await http.get(
+      uri,
+      headers: _headers,
+    );
+    return response;
+  }
+
+  Future<http.Response> markNotificationAsRead(int notificationId) async {
+    final response = await http.put(
+      Uri.parse('${AppConstants.baseUrl}/notifications/$notificationId/read'),
+      headers: _headers,
+    );
+    return response;
+  }
+
+  Future<http.Response> markAllNotificationsAsRead() async {
+    final response = await http.put(
+      Uri.parse('${AppConstants.baseUrl}/notifications/read-all'),
+      headers: _headers,
+    );
+    return response;
+  }
+
+  Future<http.Response> searchUsers(String query, {int? limit}) async {
+    final uri = Uri.parse('${AppConstants.baseUrl}/users/search').replace(
+      queryParameters: {
+        'q': query,
+        if (limit != null) 'limit': limit.toString(),
+      },
+    );
+    final response = await http.get(
+      uri,
+      headers: _headers,
+    );
+    return response;
+  }
+
   Future<http.StreamedResponse> updateProfile({
     String? username,
     String? bio,

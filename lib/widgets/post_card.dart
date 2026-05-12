@@ -7,6 +7,8 @@ import '../screens/post_detail_screen.dart';
 import '../providers/post_provider.dart';
 import '../providers/auth_provider.dart';
 import '../models/media.dart';
+import '../screens/edit_post_screen.dart';
+import 'comment_bottom_sheet.dart';
 
 class PostCard extends StatelessWidget {
   final Post post;
@@ -78,7 +80,69 @@ class PostCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Icon(Icons.more_horiz, color: colorScheme.secondary),
+                  if (authProvider.user?.id == post.author.id)
+                    PopupMenuButton<String>(
+                      icon: Icon(Icons.more_horiz, color: colorScheme.secondary),
+                      onSelected: (value) async {
+                        if (value == 'edit') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => EditPostScreen(post: post)),
+                          );
+                        } else if (value == 'delete') {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Supprimer le post'),
+                              content: const Text('Êtes-vous sûr de vouloir supprimer ce post ?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, false),
+                                  child: const Text('Annuler'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (confirm == true) {
+                            final success = await postProvider.deletePost(post.id);
+                            if (context.mounted && !success) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Erreur lors de la suppression du post')),
+                              );
+                            }
+                          }
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit_outlined, size: 20),
+                              SizedBox(width: 8),
+                              Text('Modifier'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete_outline, size: 20, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text('Supprimer', style: TextStyle(color: Colors.red)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    Icon(Icons.more_horiz, color: colorScheme.secondary),
                 ],
               ),
               const SizedBox(height: 16),
@@ -144,14 +208,21 @@ class PostCard extends StatelessWidget {
                     icon: isLiked ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
                     label: '${post.likesCount}',
                     color: isLiked ? Colors.red : colorScheme.secondary,
-                    onTap: () => postProvider.togglePostLike(post.id, isLiked),
+                    onTap: () => postProvider.togglePostLike(post.id, isLiked, userId: authProvider.user?.id),
                   ),
                   const SizedBox(width: 20),
                   _ActionButton(
                     icon: Icons.chat_bubble_outline_rounded,
                     label: '${post.comments.length}',
                     color: colorScheme.secondary,
-                    onTap: () {}, // Already handled by card tap
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => CommentBottomSheet(postId: post.id, initialComments: post.comments),
+                      );
+                    },
                   ),
                   const Spacer(),
                   IconButton(
