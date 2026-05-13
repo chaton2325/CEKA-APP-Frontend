@@ -9,19 +9,29 @@ class AppStrings {
     'alerts': {AppLanguage.fr: 'Alertes', AppLanguage.en: 'Alerts'},
     'profile': {AppLanguage.fr: 'Profil', AppLanguage.en: 'Profile'},
     'ticket': {AppLanguage.fr: 'Billet', AppLanguage.en: 'Ticket'},
-    'communityFeed': {AppLanguage.fr: 'Fil communautaire', AppLanguage.en: 'Community feed'},
+    'communityFeed': {
+      AppLanguage.fr: 'Fil communautaire',
+      AppLanguage.en: 'Community feed',
+    },
     'feedSubtitle': {
       AppLanguage.fr: 'Actualités, médias et conversations CEKA',
       AppLanguage.en: 'CEKA news, media and conversations',
     },
     'language': {AppLanguage.fr: 'Langue', AppLanguage.en: 'Language'},
+    'cekaLogo': {
+      AppLanguage.fr: 'Logo CEKA 2026',
+      AppLanguage.en: 'CEKA 2026 logo',
+    },
     'french': {AppLanguage.fr: 'Français', AppLanguage.en: 'French'},
     'english': {AppLanguage.fr: 'Anglais', AppLanguage.en: 'English'},
     'logout': {AppLanguage.fr: 'Déconnexion', AppLanguage.en: 'Logout'},
     'edit': {AppLanguage.fr: 'Modifier', AppLanguage.en: 'Edit'},
     'delete': {AppLanguage.fr: 'Supprimer', AppLanguage.en: 'Delete'},
     'cancel': {AppLanguage.fr: 'Annuler', AppLanguage.en: 'Cancel'},
-    'deletePost': {AppLanguage.fr: 'Supprimer le post', AppLanguage.en: 'Delete post'},
+    'deletePost': {
+      AppLanguage.fr: 'Supprimer le post',
+      AppLanguage.en: 'Delete post',
+    },
     'deletePostConfirm': {
       AppLanguage.fr: 'Êtes-vous sûr de vouloir supprimer ce post ?',
       AppLanguage.en: 'Are you sure you want to delete this post?',
@@ -30,8 +40,14 @@ class AppStrings {
       AppLanguage.fr: 'Erreur lors de la suppression du post',
       AppLanguage.en: 'Could not delete this post',
     },
-    'userNotFound': {AppLanguage.fr: 'Utilisateur non trouvé', AppLanguage.en: 'User not found'},
-    'postNotFound': {AppLanguage.fr: 'Post non trouvé', AppLanguage.en: 'Post not found'},
+    'userNotFound': {
+      AppLanguage.fr: 'Utilisateur non trouvé',
+      AppLanguage.en: 'User not found',
+    },
+    'postNotFound': {
+      AppLanguage.fr: 'Post non trouvé',
+      AppLanguage.en: 'Post not found',
+    },
     'details': {AppLanguage.fr: 'Détails', AppLanguage.en: 'Details'},
     'video': {AppLanguage.fr: 'Vidéo', AppLanguage.en: 'Video'},
     'audio': {AppLanguage.fr: 'Audio', AppLanguage.en: 'Audio'},
@@ -39,7 +55,10 @@ class AppStrings {
       AppLanguage.fr: 'Voir tous les commentaires',
       AppLanguage.en: 'View all comments',
     },
-    'addBio': {AppLanguage.fr: 'Ajouter une biographie', AppLanguage.en: 'Add a bio'},
+    'addBio': {
+      AppLanguage.fr: 'Ajouter une biographie',
+      AppLanguage.en: 'Add a bio',
+    },
     'joinedIn': {AppLanguage.fr: 'Rejoint en', AppLanguage.en: 'Joined in'},
     'unknownJoinDate': {
       AppLanguage.fr: 'Date d’inscription inconnue',
@@ -52,8 +71,14 @@ class AppStrings {
       AppLanguage.fr: 'Aucune publication pour le moment',
       AppLanguage.en: 'No posts yet',
     },
-    'notifications': {AppLanguage.fr: 'Notifications', AppLanguage.en: 'Notifications'},
-    'markAllRead': {AppLanguage.fr: 'Tout lire', AppLanguage.en: 'Mark all read'},
+    'notifications': {
+      AppLanguage.fr: 'Notifications',
+      AppLanguage.en: 'Notifications',
+    },
+    'markAllRead': {
+      AppLanguage.fr: 'Tout lire',
+      AppLanguage.en: 'Mark all read',
+    },
     'noNotifications': {
       AppLanguage.fr: 'Aucune notification pour le moment',
       AppLanguage.en: 'No notifications yet',
@@ -78,19 +103,28 @@ class AppStrings {
       AppLanguage.fr: ' a interagi avec vous.',
       AppLanguage.en: ' interacted with you.',
     },
-    'welcomeBack': {AppLanguage.fr: 'Bon retour', AppLanguage.en: 'Welcome Back'},
+    'welcomeBack': {
+      AppLanguage.fr: 'Bon retour',
+      AppLanguage.en: 'Welcome Back',
+    },
     'loginSubtitle': {
       AppLanguage.fr: 'Connectez-vous pour continuer',
       AppLanguage.en: 'Sign in to continue your adventure',
     },
     'email': {AppLanguage.fr: 'Email', AppLanguage.en: 'Email'},
     'password': {AppLanguage.fr: 'Mot de passe', AppLanguage.en: 'Password'},
-    'enterEmail': {AppLanguage.fr: 'Entrez votre email', AppLanguage.en: 'Please enter your email'},
+    'enterEmail': {
+      AppLanguage.fr: 'Entrez votre email',
+      AppLanguage.en: 'Please enter your email',
+    },
     'enterPassword': {
       AppLanguage.fr: 'Entrez votre mot de passe',
       AppLanguage.en: 'Please enter your password',
     },
-    'forgotPassword': {AppLanguage.fr: 'Mot de passe oublié ?', AppLanguage.en: 'Forgot Password?'},
+    'forgotPassword': {
+      AppLanguage.fr: 'Mot de passe oublié ?',
+      AppLanguage.en: 'Forgot Password?',
+    },
     'login': {AppLanguage.fr: 'Connexion', AppLanguage.en: 'Login'},
     'invalidCredentials': {
       AppLanguage.fr: 'Identifiants invalides',
@@ -102,12 +136,18 @@ class AppStrings {
     },
     'register': {AppLanguage.fr: 'Inscription', AppLanguage.en: 'Register'},
     'joinCeka': {AppLanguage.fr: 'Rejoindre CEKA', AppLanguage.en: 'Join CEKA'},
-    'createAccount': {AppLanguage.fr: 'Créer un compte', AppLanguage.en: 'Create Account'},
+    'createAccount': {
+      AppLanguage.fr: 'Créer un compte',
+      AppLanguage.en: 'Create Account',
+    },
     'registerSubtitle': {
       AppLanguage.fr: 'Commencez votre parcours avec nous',
       AppLanguage.en: 'Start your journey with us today',
     },
-    'username': {AppLanguage.fr: 'Nom d’utilisateur', AppLanguage.en: 'Username'},
+    'username': {
+      AppLanguage.fr: 'Nom d’utilisateur',
+      AppLanguage.en: 'Username',
+    },
     'enterUsername': {
       AppLanguage.fr: 'Entrez un nom d’utilisateur',
       AppLanguage.en: 'Please enter a username',
@@ -124,21 +164,42 @@ class AppStrings {
       AppLanguage.fr: 'Vous avez déjà un compte ?',
       AppLanguage.en: 'Already have an account?',
     },
-    'buyTicket': {AppLanguage.fr: 'Acheter Billet CEKA 2026', AppLanguage.en: 'Buy CEKA 2026 Ticket'},
-    'forgotPasswordTitle': {AppLanguage.fr: 'Mot de passe oublié', AppLanguage.en: 'Forgot Password'},
+    'buyTicket': {
+      AppLanguage.fr: 'Acheter Billet CEKA 2026',
+      AppLanguage.en: 'Buy CEKA 2026 Ticket',
+    },
+    'forgotPasswordTitle': {
+      AppLanguage.fr: 'Mot de passe oublié',
+      AppLanguage.en: 'Forgot Password',
+    },
     'forgotPasswordHelp': {
       AppLanguage.fr: 'Entrez votre email pour recevoir un code.',
       AppLanguage.en: 'Enter your email to receive a reset code.',
     },
-    'sendCode': {AppLanguage.fr: 'Envoyer le code', AppLanguage.en: 'Send Code'},
+    'sendCode': {
+      AppLanguage.fr: 'Envoyer le code',
+      AppLanguage.en: 'Send Code',
+    },
     'sendCodeFailed': {
       AppLanguage.fr: 'Impossible d’envoyer le code',
       AppLanguage.en: 'Failed to send reset code',
     },
-    'resetPassword': {AppLanguage.fr: 'Réinitialiser le mot de passe', AppLanguage.en: 'Reset Password'},
-    'resetCode': {AppLanguage.fr: 'Code de réinitialisation', AppLanguage.en: 'Reset Code'},
-    'newPassword': {AppLanguage.fr: 'Nouveau mot de passe', AppLanguage.en: 'New Password'},
-    'resetSentTo': {AppLanguage.fr: 'Code envoyé à', AppLanguage.en: 'Reset code sent to'},
+    'resetPassword': {
+      AppLanguage.fr: 'Réinitialiser le mot de passe',
+      AppLanguage.en: 'Reset Password',
+    },
+    'resetCode': {
+      AppLanguage.fr: 'Code de réinitialisation',
+      AppLanguage.en: 'Reset Code',
+    },
+    'newPassword': {
+      AppLanguage.fr: 'Nouveau mot de passe',
+      AppLanguage.en: 'New Password',
+    },
+    'resetSentTo': {
+      AppLanguage.fr: 'Code envoyé à',
+      AppLanguage.en: 'Reset code sent to',
+    },
     'passwordResetSuccess': {
       AppLanguage.fr: 'Mot de passe réinitialisé',
       AppLanguage.en: 'Password reset successfully',
@@ -147,12 +208,27 @@ class AppStrings {
       AppLanguage.fr: 'Impossible de réinitialiser le mot de passe',
       AppLanguage.en: 'Failed to reset password',
     },
-    'editProfile': {AppLanguage.fr: 'Modifier le profil', AppLanguage.en: 'Edit Profile'},
-    'profilePhoto': {AppLanguage.fr: 'Photo de profil', AppLanguage.en: 'Profile Photo'},
-    'bannerPhoto': {AppLanguage.fr: 'Photo de couverture', AppLanguage.en: 'Banner Photo'},
+    'editProfile': {
+      AppLanguage.fr: 'Modifier le profil',
+      AppLanguage.en: 'Edit Profile',
+    },
+    'profilePhoto': {
+      AppLanguage.fr: 'Photo de profil',
+      AppLanguage.en: 'Profile Photo',
+    },
+    'bannerPhoto': {
+      AppLanguage.fr: 'Photo de couverture',
+      AppLanguage.en: 'Banner Photo',
+    },
     'bio': {AppLanguage.fr: 'Bio', AppLanguage.en: 'Bio'},
-    'updateFailed': {AppLanguage.fr: 'Mise à jour échouée', AppLanguage.en: 'Update failed'},
-    'newPublication': {AppLanguage.fr: 'Nouvelle publication', AppLanguage.en: 'New Publication'},
+    'updateFailed': {
+      AppLanguage.fr: 'Mise à jour échouée',
+      AppLanguage.en: 'Update failed',
+    },
+    'newPublication': {
+      AppLanguage.fr: 'Nouvelle publication',
+      AppLanguage.en: 'New Publication',
+    },
     'post': {AppLanguage.fr: 'Publier', AppLanguage.en: 'Post'},
     'createPostFailed': {
       AppLanguage.fr: 'Impossible de créer la publication',
@@ -163,7 +239,10 @@ class AppStrings {
       AppLanguage.en: 'Share something inspiring...',
     },
     'media': {AppLanguage.fr: 'Média', AppLanguage.en: 'Media'},
-    'editPost': {AppLanguage.fr: 'Modifier le post', AppLanguage.en: 'Edit post'},
+    'editPost': {
+      AppLanguage.fr: 'Modifier le post',
+      AppLanguage.en: 'Edit post',
+    },
     'save': {AppLanguage.fr: 'Enregistrer', AppLanguage.en: 'Save'},
     'updatePostFailed': {
       AppLanguage.fr: 'Impossible de modifier le post',
@@ -186,14 +265,28 @@ class AppStrings {
       AppLanguage.en: 'New media to add:',
     },
     'accountActions': {AppLanguage.fr: 'Compte', AppLanguage.en: 'Account'},
-    'deleteAccount': {AppLanguage.fr: 'Supprimer le compte', AppLanguage.en: 'Delete account'},
-    'deleteAccountTitle': {AppLanguage.fr: 'Supprimer votre compte', AppLanguage.en: 'Delete your account'},
-    'deleteAccountMessage': {
-      AppLanguage.fr: 'Cette action supprime immediatement votre compte et vos contenus lies. Entrez votre mot de passe pour confirmer.',
-      AppLanguage.en: 'This immediately deletes your account and related content. Enter your password to confirm.',
+    'deleteAccount': {
+      AppLanguage.fr: 'Supprimer le compte',
+      AppLanguage.en: 'Delete account',
     },
-    'currentPassword': {AppLanguage.fr: 'Mot de passe actuel', AppLanguage.en: 'Current password'},
-    'deleteAccountSuccess': {AppLanguage.fr: 'Compte supprime', AppLanguage.en: 'Account deleted'},
+    'deleteAccountTitle': {
+      AppLanguage.fr: 'Supprimer votre compte',
+      AppLanguage.en: 'Delete your account',
+    },
+    'deleteAccountMessage': {
+      AppLanguage.fr:
+          'Cette action supprime immediatement votre compte et vos contenus lies. Entrez votre mot de passe pour confirmer.',
+      AppLanguage.en:
+          'This immediately deletes your account and related content. Enter your password to confirm.',
+    },
+    'currentPassword': {
+      AppLanguage.fr: 'Mot de passe actuel',
+      AppLanguage.en: 'Current password',
+    },
+    'deleteAccountSuccess': {
+      AppLanguage.fr: 'Compte supprime',
+      AppLanguage.en: 'Account deleted',
+    },
     'deleteAccountFailed': {
       AppLanguage.fr: 'Impossible de supprimer le compte',
       AppLanguage.en: 'Could not delete account',
@@ -211,11 +304,16 @@ class AppStrings {
       AppLanguage.en: 'Data deletion request',
     },
     'requestDataDeletionMessage': {
-      AppLanguage.fr: 'Cette demande sera traitee manuellement. Elle ne supprime pas votre compte immediatement.',
-      AppLanguage.en: 'This request will be handled manually. It does not delete your account immediately.',
+      AppLanguage.fr:
+          'Cette demande sera traitee manuellement. Elle ne supprime pas votre compte immediatement.',
+      AppLanguage.en:
+          'This request will be handled manually. It does not delete your account immediately.',
     },
     'reason': {AppLanguage.fr: 'Raison', AppLanguage.en: 'Reason'},
-    'sendRequest': {AppLanguage.fr: 'Envoyer la demande', AppLanguage.en: 'Send request'},
+    'sendRequest': {
+      AppLanguage.fr: 'Envoyer la demande',
+      AppLanguage.en: 'Send request',
+    },
     'dataDeletionRequestSent': {
       AppLanguage.fr: 'Demande envoyee',
       AppLanguage.en: 'Request sent',
@@ -227,7 +325,10 @@ class AppStrings {
   };
 
   static String of(BuildContext context, String key) {
-    final language = Provider.of<LanguageProvider>(context, listen: false).language;
+    final language = Provider.of<LanguageProvider>(
+      context,
+      listen: false,
+    ).language;
     return _values[key]?[language] ?? _values[key]?[AppLanguage.fr] ?? key;
   }
 }

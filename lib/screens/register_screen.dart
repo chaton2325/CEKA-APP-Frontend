@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/language_provider.dart';
 import '../utils/app_strings.dart';
+import '../widgets/auth_brand_header.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -20,11 +21,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
-      final success = await Provider.of<AuthProvider>(context, listen: false).register(
-        _usernameController.text,
-        _emailController.text,
-        _passwordController.text,
-      );
+      final success = await Provider.of<AuthProvider>(context, listen: false)
+          .register(
+            _usernameController.text,
+            _emailController.text,
+            _passwordController.text,
+          );
       if (success && mounted) {
         Navigator.pushReplacementNamed(context, '/home');
       } else if (mounted) {
@@ -50,7 +52,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           PopupMenuButton<AppLanguage>(
             tooltip: context.tr('language'),
             icon: const Icon(Icons.language_rounded),
-            onSelected: (language) => context.read<LanguageProvider>().setLanguage(language),
+            onSelected: (language) =>
+                context.read<LanguageProvider>().setLanguage(language),
             itemBuilder: (context) => [
               PopupMenuItem(
                 value: AppLanguage.fr,
@@ -72,6 +75,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                AuthBrandHeader(semanticLabel: context.tr('cekaLogo')),
+                const SizedBox(height: 28),
                 Text(
                   context.tr('createAccount'),
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -82,9 +87,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 8),
                 Text(
                   context.tr('registerSubtitle'),
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.secondary,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(color: colorScheme.secondary),
                 ),
                 const SizedBox(height: 40),
                 TextFormField(
@@ -93,7 +98,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     labelText: context.tr('username'),
                     prefixIcon: const Icon(Icons.person_outline),
                   ),
-                  validator: (value) => value!.isEmpty ? context.tr('enterUsername') : null,
+                  validator: (value) =>
+                      value!.isEmpty ? context.tr('enterUsername') : null,
                 ),
                 const SizedBox(height: 20),
                 TextFormField(
@@ -103,7 +109,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     prefixIcon: const Icon(Icons.email_outlined),
                   ),
                   keyboardType: TextInputType.emailAddress,
-                  validator: (value) => value!.isEmpty ? context.tr('enterEmail') : null,
+                  validator: (value) =>
+                      value!.isEmpty ? context.tr('enterEmail') : null,
                 ),
                 const SizedBox(height: 20),
                 TextFormField(
@@ -112,12 +119,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     labelText: context.tr('password'),
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
-                      icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
                   obscureText: _obscurePassword,
-                  validator: (value) => value!.length < 8 ? context.tr('passwordMin') : null,
+                  validator: (value) =>
+                      value!.length < 8 ? context.tr('passwordMin') : null,
                 ),
                 const SizedBox(height: 40),
                 auth.isLoading
@@ -130,12 +143,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(context.tr('alreadyAccount'), style: TextStyle(color: colorScheme.onSurfaceVariant)),
+                    Text(
+                      context.tr('alreadyAccount'),
+                      style: TextStyle(color: colorScheme.onSurfaceVariant),
+                    ),
                     TextButton(
                       onPressed: () => Navigator.pop(context),
                       child: Text(
                         context.tr('login'),
-                        style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],

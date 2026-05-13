@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/language_provider.dart';
 import '../utils/app_strings.dart';
+import '../widgets/auth_brand_header.dart';
 import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -20,10 +21,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
-      final success = await Provider.of<AuthProvider>(context, listen: false).login(
-        _emailController.text,
-        _passwordController.text,
-      );
+      final success = await Provider.of<AuthProvider>(
+        context,
+        listen: false,
+      ).login(_emailController.text, _passwordController.text);
       if (!success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -54,7 +55,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: PopupMenuButton<AppLanguage>(
                     tooltip: context.tr('language'),
                     icon: const Icon(Icons.language_rounded),
-                    onSelected: (language) => context.read<LanguageProvider>().setLanguage(language),
+                    onSelected: (language) =>
+                        context.read<LanguageProvider>().setLanguage(language),
                     itemBuilder: (context) => [
                       PopupMenuItem(
                         value: AppLanguage.fr,
@@ -67,7 +69,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                AuthBrandHeader(semanticLabel: context.tr('cekaLogo')),
+                const SizedBox(height: 28),
                 Text(
                   context.tr('welcomeBack'),
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
@@ -78,9 +81,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 8),
                 Text(
                   context.tr('loginSubtitle'),
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.secondary,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(color: colorScheme.secondary),
                 ),
                 const SizedBox(height: 48),
                 TextFormField(
@@ -90,7 +93,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     prefixIcon: const Icon(Icons.email_outlined),
                   ),
                   keyboardType: TextInputType.emailAddress,
-                  validator: (value) => value!.isEmpty ? context.tr('enterEmail') : null,
+                  validator: (value) =>
+                      value!.isEmpty ? context.tr('enterEmail') : null,
                 ),
                 const SizedBox(height: 20),
                 TextFormField(
@@ -99,21 +103,32 @@ class _LoginScreenState extends State<LoginScreen> {
                     labelText: context.tr('password'),
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
-                      icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
                   obscureText: _obscurePassword,
-                  validator: (value) => value!.isEmpty ? context.tr('enterPassword') : null,
+                  validator: (value) =>
+                      value!.isEmpty ? context.tr('enterPassword') : null,
                 ),
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => const ForgotPasswordScreen(),
+                      ),
                     ),
-                    child: Text(context.tr('forgotPassword'), style: TextStyle(color: colorScheme.secondary)),
+                    child: Text(
+                      context.tr('forgotPassword'),
+                      style: TextStyle(color: colorScheme.secondary),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -127,12 +142,19 @@ class _LoginScreenState extends State<LoginScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(context.tr('noAccount'), style: TextStyle(color: colorScheme.onSurfaceVariant)),
+                    Text(
+                      context.tr('noAccount'),
+                      style: TextStyle(color: colorScheme.onSurfaceVariant),
+                    ),
                     TextButton(
-                      onPressed: () => Navigator.pushNamed(context, '/register'),
+                      onPressed: () =>
+                          Navigator.pushNamed(context, '/register'),
                       child: Text(
                         context.tr('register'),
-                        style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
