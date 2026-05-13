@@ -140,4 +140,55 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
     return false;
   }
+
+  Future<String?> deleteAccount(String currentPassword) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final response = await _apiService.deleteAccount(currentPassword);
+      if (response.statusCode == 200) {
+        await logout();
+        _isLoading = false;
+        notifyListeners();
+        return null;
+      }
+
+      final data = jsonDecode(response.body);
+      _isLoading = false;
+      notifyListeners();
+      return data['error']?.toString() ?? 'delete_account_failed';
+    } catch (e) {
+      debugPrint('Delete account error: $e');
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return 'delete_account_failed';
+  }
+
+  Future<String?> requestDataDeletion(String reason) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final response = await _apiService.requestDataDeletion(reason);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        _isLoading = false;
+        notifyListeners();
+        return null;
+      }
+
+      final data = jsonDecode(response.body);
+      _isLoading = false;
+      notifyListeners();
+      return data['error']?.toString() ?? 'data_deletion_request_failed';
+    } catch (e) {
+      debugPrint('Data deletion request error: $e');
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return 'data_deletion_request_failed';
+  }
 }

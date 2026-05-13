@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/language_provider.dart';
+import '../utils/app_strings.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -28,7 +30,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Registration failed'),
+            content: Text(context.tr('registrationFailed')),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -42,7 +44,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Join CEKA')),
+      appBar: AppBar(
+        title: Text(context.tr('joinCeka')),
+        actions: [
+          PopupMenuButton<AppLanguage>(
+            tooltip: context.tr('language'),
+            icon: const Icon(Icons.language_rounded),
+            onSelected: (language) => context.read<LanguageProvider>().setLanguage(language),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: AppLanguage.fr,
+                child: Text(context.tr('french')),
+              ),
+              PopupMenuItem(
+                value: AppLanguage.en,
+                child: Text(context.tr('english')),
+              ),
+            ],
+          ),
+        ],
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
@@ -52,7 +73,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Create Account',
+                  context.tr('createAccount'),
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: colorScheme.primary,
@@ -60,7 +81,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Start your journey with us today',
+                  context.tr('registerSubtitle'),
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: colorScheme.secondary,
                   ),
@@ -68,27 +89,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 40),
                 TextFormField(
                   controller: _usernameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Username',
-                    prefixIcon: Icon(Icons.person_outline),
+                  decoration: InputDecoration(
+                    labelText: context.tr('username'),
+                    prefixIcon: const Icon(Icons.person_outline),
                   ),
-                  validator: (value) => value!.isEmpty ? 'Please enter a username' : null,
+                  validator: (value) => value!.isEmpty ? context.tr('enterUsername') : null,
                 ),
                 const SizedBox(height: 20),
                 TextFormField(
                   controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: Icon(Icons.email_outlined),
+                  decoration: InputDecoration(
+                    labelText: context.tr('email'),
+                    prefixIcon: const Icon(Icons.email_outlined),
                   ),
                   keyboardType: TextInputType.emailAddress,
-                  validator: (value) => value!.isEmpty ? 'Please enter your email' : null,
+                  validator: (value) => value!.isEmpty ? context.tr('enterEmail') : null,
                 ),
                 const SizedBox(height: 20),
                 TextFormField(
                   controller: _passwordController,
                   decoration: InputDecoration(
-                    labelText: 'Password',
+                    labelText: context.tr('password'),
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
@@ -96,24 +117,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   obscureText: _obscurePassword,
-                  validator: (value) => value!.length < 8 ? 'Password must be at least 8 characters' : null,
+                  validator: (value) => value!.length < 8 ? context.tr('passwordMin') : null,
                 ),
                 const SizedBox(height: 40),
                 auth.isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : ElevatedButton(
                         onPressed: _register,
-                        child: const Text('Register'),
+                        child: Text(context.tr('register')),
                       ),
                 const SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Already have an account?', style: TextStyle(color: colorScheme.onSurfaceVariant)),
+                    Text(context.tr('alreadyAccount'), style: TextStyle(color: colorScheme.onSurfaceVariant)),
                     TextButton(
                       onPressed: () => Navigator.pop(context),
                       child: Text(
-                        'Login',
+                        context.tr('login'),
                         style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold),
                       ),
                     ),

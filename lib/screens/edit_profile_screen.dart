@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../utils/app_strings.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -52,7 +53,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (success && mounted) {
       Navigator.pop(context);
     } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Update failed')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.tr('updateFailed'))));
     }
   }
 
@@ -62,7 +63,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Profile'),
+        title: Text(context.tr('editProfile')),
         actions: [
           auth.isLoading
               ? const Center(child: Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator(color: Colors.white)))
@@ -74,24 +75,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         child: Column(
           children: [
             ListTile(
-              title: const Text('Profile Photo'),
+              title: Text(context.tr('profilePhoto')),
               trailing: _profileImage != null ? Image.file(_profileImage!, width: 50) : const Icon(Icons.add_a_photo),
               onTap: () => _pickImage(true),
             ),
             ListTile(
-              title: const Text('Banner Photo'),
+              title: Text(context.tr('bannerPhoto')),
               trailing: _bannerImage != null ? Image.file(_bannerImage!, width: 50) : const Icon(Icons.add_a_photo),
               onTap: () => _pickImage(false),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _usernameController,
-              decoration: const InputDecoration(labelText: 'Username'),
+              decoration: InputDecoration(labelText: context.tr('username')),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _bioController,
-              decoration: const InputDecoration(labelText: 'Bio'),
+              decoration: InputDecoration(labelText: context.tr('bio')),
               maxLines: 3,
             ),
           ],

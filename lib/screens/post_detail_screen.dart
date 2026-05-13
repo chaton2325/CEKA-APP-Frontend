@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../models/post.dart';
 import '../providers/post_provider.dart';
 import '../providers/auth_provider.dart';
+import '../utils/app_strings.dart';
 import '../utils/constants.dart';
 import '../models/media.dart';
 import '../widgets/comment_bottom_sheet.dart';
@@ -64,7 +65,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) return const Scaffold(backgroundColor: Colors.white, body: Center(child: CircularProgressIndicator()));
-    if (_post == null) return const Scaffold(backgroundColor: Colors.white, body: Center(child: Text('Post non trouvé')));
+    if (_post == null) return Scaffold(backgroundColor: Colors.white, body: Center(child: Text(context.tr('postNotFound'))));
 
     final authProvider = Provider.of<AuthProvider>(context);
     final isLiked = authProvider.user != null && _post!.isLikedBy(authProvider.user!.id);
@@ -72,7 +73,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(title: const Text('Détails')),
+      appBar: AppBar(title: Text(context.tr('details'))),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -117,7 +118,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     child: Icon(m.mediaType == MediaType.video ? Icons.videocam_rounded : Icons.audiotrack_rounded, color: colorScheme.primary),
                   ),
                   title: Text(m.filename, style: const TextStyle(fontWeight: FontWeight.w500)),
-                  subtitle: Text(m.mediaType == MediaType.video ? 'Vidéo' : 'Audio', style: const TextStyle(fontSize: 12)),
+                  subtitle: Text(m.mediaType == MediaType.video ? context.tr('video') : context.tr('audio'), style: const TextStyle(fontSize: 12)),
                   onTap: () {},
                 ),
               )),
@@ -150,7 +151,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               child: TextButton.icon(
                 onPressed: _showComments,
                 icon: const Icon(Icons.comment_rounded),
-                label: const Text('Voir tous les commentaires', style: TextStyle(fontWeight: FontWeight.bold)),
+                label: Text(context.tr('viewAllComments'), style: const TextStyle(fontWeight: FontWeight.bold)),
               ),
             ),
           ],

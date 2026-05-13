@@ -9,6 +9,7 @@ import 'create_post_screen.dart';
 import 'profile_screen.dart';
 import 'notification_screen.dart';
 import '../providers/notification_provider.dart';
+import '../utils/app_strings.dart';
 import '../widgets/user_search_delegate.dart';
 import 'ticket_webview_screen.dart';
 
@@ -90,10 +91,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
               },
               destinations: [
-                const NavigationDestination(
-                  icon: Icon(Icons.home_outlined),
-                  selectedIcon: Icon(Icons.home_rounded),
-                  label: 'Accueil',
+                NavigationDestination(
+                  icon: const Icon(Icons.home_outlined),
+                  selectedIcon: const Icon(Icons.home_rounded),
+                  label: context.tr('home'),
                 ),
                 NavigationDestination(
                   icon: Badge(
@@ -102,17 +103,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: const Icon(Icons.notifications_none_rounded),
                   ),
                   selectedIcon: const Icon(Icons.notifications_rounded),
-                  label: 'Alertes',
+                  label: context.tr('alerts'),
                 ),
-                const NavigationDestination(
-                  icon: Icon(Icons.person_outline_rounded),
-                  selectedIcon: Icon(Icons.person_rounded),
-                  label: 'Profil',
+                NavigationDestination(
+                  icon: const Icon(Icons.person_outline_rounded),
+                  selectedIcon: const Icon(Icons.person_rounded),
+                  label: context.tr('profile'),
                 ),
-                const NavigationDestination(
-                  icon: Icon(Icons.confirmation_number_outlined),
-                  selectedIcon: Icon(Icons.confirmation_number_rounded),
-                  label: 'Billet',
+                NavigationDestination(
+                  icon: const Icon(Icons.confirmation_number_outlined),
+                  selectedIcon: const Icon(Icons.confirmation_number_rounded),
+                  label: context.tr('ticket'),
                 ),
               ],
             ),
@@ -278,18 +279,18 @@ class _FeedHeader extends StatelessWidget {
               child: const Icon(Icons.eco_rounded, color: Colors.white),
             ),
             const SizedBox(width: 14),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Fil communautaire',
-                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800),
+                    context.tr('communityFeed'),
+                    style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800),
                   ),
-                  SizedBox(height: 3),
+                  const SizedBox(height: 3),
                   Text(
-                    'Actualites, medias et conversations CEKA',
-                    style: TextStyle(color: Color(0xDFFFFFFF), fontSize: 13, fontWeight: FontWeight.w500),
+                    context.tr('feedSubtitle'),
+                    style: const TextStyle(color: Color(0xDFFFFFFF), fontSize: 13, fontWeight: FontWeight.w500),
                   ),
                 ],
               ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import '../utils/app_strings.dart';
 
 class TicketWebViewScreen extends StatefulWidget {
   final String url;
@@ -24,7 +25,7 @@ class _TicketWebViewScreenState extends State<TicketWebViewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Acheter Billet CEKA 2026')),
+      appBar: AppBar(title: Text(context.tr('buyTicket'))),
       body: WebViewWidget(controller: _controller),
     );
   }

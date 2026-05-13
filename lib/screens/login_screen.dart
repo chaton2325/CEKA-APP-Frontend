@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/language_provider.dart';
+import '../utils/app_strings.dart';
 import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -25,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Invalid credentials'),
+            content: Text(context.tr('invalidCredentials')),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -47,9 +49,27 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: PopupMenuButton<AppLanguage>(
+                    tooltip: context.tr('language'),
+                    icon: const Icon(Icons.language_rounded),
+                    onSelected: (language) => context.read<LanguageProvider>().setLanguage(language),
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: AppLanguage.fr,
+                        child: Text(context.tr('french')),
+                      ),
+                      PopupMenuItem(
+                        value: AppLanguage.en,
+                        child: Text(context.tr('english')),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 20),
                 Text(
-                  'Welcome Back',
+                  context.tr('welcomeBack'),
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: colorScheme.primary,
@@ -57,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Sign in to continue your adventure',
+                  context.tr('loginSubtitle'),
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: colorScheme.secondary,
                   ),
@@ -65,18 +85,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 48),
                 TextFormField(
                   controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: Icon(Icons.email_outlined),
+                  decoration: InputDecoration(
+                    labelText: context.tr('email'),
+                    prefixIcon: const Icon(Icons.email_outlined),
                   ),
                   keyboardType: TextInputType.emailAddress,
-                  validator: (value) => value!.isEmpty ? 'Please enter your email' : null,
+                  validator: (value) => value!.isEmpty ? context.tr('enterEmail') : null,
                 ),
                 const SizedBox(height: 20),
                 TextFormField(
                   controller: _passwordController,
                   decoration: InputDecoration(
-                    labelText: 'Password',
+                    labelText: context.tr('password'),
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
@@ -84,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   obscureText: _obscurePassword,
-                  validator: (value) => value!.isEmpty ? 'Please enter your password' : null,
+                  validator: (value) => value!.isEmpty ? context.tr('enterPassword') : null,
                 ),
                 Align(
                   alignment: Alignment.centerRight,
@@ -93,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       context,
                       MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
                     ),
-                    child: Text('Forgot Password?', style: TextStyle(color: colorScheme.secondary)),
+                    child: Text(context.tr('forgotPassword'), style: TextStyle(color: colorScheme.secondary)),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -101,17 +121,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     ? const Center(child: CircularProgressIndicator())
                     : ElevatedButton(
                         onPressed: _login,
-                        child: const Text('Login'),
+                        child: Text(context.tr('login')),
                       ),
                 const SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Don\'t have an account?', style: TextStyle(color: colorScheme.onSurfaceVariant)),
+                    Text(context.tr('noAccount'), style: TextStyle(color: colorScheme.onSurfaceVariant)),
                     TextButton(
                       onPressed: () => Navigator.pushNamed(context, '/register'),
                       child: Text(
-                        'Register',
+                        context.tr('register'),
                         style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold),
                       ),
                     ),

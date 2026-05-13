@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../utils/app_strings.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String email;
@@ -28,37 +29,37 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     setState(() => _isLoading = false);
 
     if (response.statusCode == 200 && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Password reset successfully')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.tr('passwordResetSuccess'))));
       Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
     } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to reset password')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.tr('passwordResetFailed'))));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Reset Password')),
+      appBar: AppBar(title: Text(context.tr('resetPassword'))),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Text('Reset code sent to ${widget.email}'),
+            Text('${context.tr('resetSentTo')} ${widget.email}'),
             const SizedBox(height: 16),
             TextField(
               controller: _codeController,
-              decoration: const InputDecoration(labelText: 'Reset Code'),
+              decoration: InputDecoration(labelText: context.tr('resetCode')),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _newPasswordController,
-              decoration: const InputDecoration(labelText: 'New Password'),
+              decoration: InputDecoration(labelText: context.tr('newPassword')),
               obscureText: true,
             ),
             const SizedBox(height: 24),
             _isLoading
                 ? const CircularProgressIndicator()
-                : ElevatedButton(onPressed: _submit, child: const Text('Reset Password')),
+                : ElevatedButton(onPressed: _submit, child: Text(context.tr('resetPassword'))),
           ],
         ),
       ),

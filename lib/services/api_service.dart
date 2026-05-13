@@ -81,6 +81,28 @@ class ApiService {
     return response;
   }
 
+  Future<http.Response> deleteAccount(String currentPassword) async {
+    final response = await http.delete(
+      Uri.parse('${AppConstants.baseUrl}/auth/me'),
+      headers: _headers,
+      body: jsonEncode({
+        'current_password': currentPassword,
+      }),
+    );
+    return response;
+  }
+
+  Future<http.Response> requestDataDeletion(String reason) async {
+    final response = await http.post(
+      Uri.parse('${AppConstants.baseUrl}/auth/me/data-deletion-request'),
+      headers: _headers,
+      body: jsonEncode({
+        'reason': reason,
+      }),
+    );
+    return response;
+  }
+
   Future<http.Response> getMe() async {
     final response = await http.get(
       Uri.parse('${AppConstants.baseUrl}/auth/me'),

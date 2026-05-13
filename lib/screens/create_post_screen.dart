@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
 import '../providers/post_provider.dart';
+import '../utils/app_strings.dart';
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({super.key});
@@ -47,7 +48,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     if (success && mounted) {
       Navigator.pop(context);
     } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to create post')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.tr('createPostFailed'))));
     }
   }
 
@@ -58,7 +59,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('New Publication'),
+        title: Text(context.tr('newPublication')),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -70,7 +71,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                       minimumSize: const Size(80, 36),
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                     ),
-                    child: const Text('Post'),
+                    child: Text(context.tr('post')),
                   ),
           ),
         ],
@@ -84,8 +85,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 children: [
                   TextField(
                     controller: _contentController,
-                    decoration: const InputDecoration(
-                      hintText: 'Share something inspiring...',
+                    decoration: InputDecoration(
+                      hintText: context.tr('shareSomething'),
                       border: InputBorder.none,
                       enabledBorder: InputBorder.none,
                       focusedBorder: InputBorder.none,
@@ -155,21 +156,21 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               children: [
                 _MediaButton(
                   icon: Icons.image_outlined,
-                  label: 'Media',
+                  label: context.tr('media'),
                   onTap: _pickMedia,
                   color: colorScheme.primary,
                 ),
                 const SizedBox(width: 16),
                 _MediaButton(
                   icon: Icons.videocam_outlined,
-                  label: 'Video',
+                  label: context.tr('video'),
                   onTap: _pickMedia,
                   color: colorScheme.secondary,
                 ),
                 const SizedBox(width: 16),
                 _MediaButton(
                   icon: Icons.mic_none_rounded,
-                  label: 'Audio',
+                  label: context.tr('audio'),
                   onTap: _pickMedia,
                   color: Colors.orange,
                 ),

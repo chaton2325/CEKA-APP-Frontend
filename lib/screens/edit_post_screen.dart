@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
 import '../models/post.dart';
 import '../providers/post_provider.dart';
+import '../utils/app_strings.dart';
 
 class EditPostScreen extends StatefulWidget {
   final Post post;
@@ -57,7 +58,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
     if (success && mounted) {
       Navigator.pop(context);
     } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to update post')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.tr('updatePostFailed'))));
     }
   }
 
@@ -68,7 +69,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Modifier le post'),
+        title: Text(context.tr('editPost')),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -80,7 +81,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
                       minimumSize: const Size(80, 36),
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                     ),
-                    child: const Text('Enregistrer'),
+                    child: Text(context.tr('save')),
                   ),
           ),
         ],
@@ -95,8 +96,8 @@ class _EditPostScreenState extends State<EditPostScreen> {
                 children: [
                   TextField(
                     controller: _contentController,
-                    decoration: const InputDecoration(
-                      hintText: 'Modifier votre texte...',
+                    decoration: InputDecoration(
+                      hintText: context.tr('editYourText'),
                       border: InputBorder.none,
                       enabledBorder: InputBorder.none,
                       focusedBorder: InputBorder.none,
@@ -107,7 +108,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
                   ),
                   const SizedBox(height: 20),
                   if (widget.post.media.isNotEmpty && !_replaceMedia) ...[
-                    const Text('Médias actuels (seront conservés) :', style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(context.tr('currentMediaKept'), style: const TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     SizedBox(
                       height: 80,
@@ -135,12 +136,12 @@ class _EditPostScreenState extends State<EditPostScreen> {
                         value: _replaceMedia,
                         onChanged: (val) => setState(() => _replaceMedia = val ?? false),
                       ),
-                      const Text('Remplacer tous les médias existants'),
+                      Text(context.tr('replaceExistingMedia')),
                     ],
                   ),
                   const SizedBox(height: 16),
                   if (_newMediaFiles.isNotEmpty) ...[
-                    const Text('Nouveaux médias à ajouter :', style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(context.tr('newMediaToAdd'), style: const TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     GridView.builder(
                       shrinkWrap: true,
@@ -201,7 +202,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
               children: [
                 _MediaButton(
                   icon: Icons.image_outlined,
-                  label: 'Média',
+                  label: context.tr('media'),
                   onTap: _pickMedia,
                   color: colorScheme.primary,
                 ),

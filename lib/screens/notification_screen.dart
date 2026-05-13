@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/notification_provider.dart';
+import '../utils/app_strings.dart';
 import '../utils/constants.dart';
 import '../screens/post_detail_screen.dart';
 
@@ -28,12 +29,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Text(context.tr('notifications')),
         actions: [
           if (notificationProvider.notifications.any((n) => !n.isRead))
             TextButton(
               onPressed: () => notificationProvider.markAllAsRead(),
-              child: const Text('Tout lire'),
+              child: Text(context.tr('markAllRead')),
             ),
         ],
       ),
@@ -48,7 +49,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       children: [
                         Icon(Icons.notifications_none_rounded, size: 64, color: colorScheme.secondary.withOpacity(0.5)),
                         const SizedBox(height: 16),
-                        const Text('Aucune notification pour le moment', style: TextStyle(fontSize: 16)),
+                        Text(context.tr('noNotifications'), style: const TextStyle(fontSize: 16)),
                       ],
                     ),
                   )
@@ -72,7 +73,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                 text: notification.actor.username,
                                 style: const TextStyle(fontWeight: FontWeight.bold),
                               ),
-                              TextSpan(text: _getNotificationText(notification.type)),
+                              TextSpan(text: _getNotificationText(context, notification.type)),
                             ],
                           ),
                         ),
@@ -101,7 +102,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
   }
 
-  String _getNotificationText(String type) {
+  String _getNotificationText(BuildContext context, String type) {
+    final translationKey = {
+      'post_comment': 'notifPostComment',
+      'comment_reply': 'notifCommentReply',
+      'post_like': 'notifPostLike',
+      'comment_like': 'notifCommentLike',
+    }[type];
+    if (translationKey != null) return context.tr(translationKey);
+
     switch (type) {
       case 'post_comment':
         return ' a commenté votre post.';
@@ -112,7 +121,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       case 'comment_like':
         return ' a aimé votre commentaire.';
       default:
-        return ' a interagi avec vous.';
+        return context.tr('notifInteraction');
     }
   }
 }

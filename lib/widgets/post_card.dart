@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/post.dart';
+import '../utils/app_strings.dart';
 import '../utils/constants.dart';
 import '../screens/post_detail_screen.dart';
 import '../providers/post_provider.dart';
@@ -95,16 +96,16 @@ class PostCard extends StatelessWidget {
                           final confirm = await showDialog<bool>(
                             context: context,
                             builder: (context) => AlertDialog(
-                              title: const Text('Supprimer le post'),
-                              content: const Text('Êtes-vous sûr de vouloir supprimer ce post ?'),
+                              title: Text(context.tr('deletePost')),
+                              content: Text(context.tr('deletePostConfirm')),
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(context, false),
-                                  child: const Text('Annuler'),
+                                  child: Text(context.tr('cancel')),
                                 ),
                                 TextButton(
                                   onPressed: () => Navigator.pop(context, true),
-                                  child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+                                  child: Text(context.tr('delete'), style: const TextStyle(color: Colors.red)),
                                 ),
                               ],
                             ),
@@ -114,30 +115,30 @@ class PostCard extends StatelessWidget {
                             final success = await postProvider.deletePost(post.id);
                             if (context.mounted && !success) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Erreur lors de la suppression du post')),
+                                SnackBar(content: Text(context.tr('deletePostError'))),
                               );
                             }
                           }
                         }
                       },
                       itemBuilder: (context) => [
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: 'edit',
                           child: Row(
                             children: [
-                              Icon(Icons.edit_outlined, size: 20),
-                              SizedBox(width: 8),
-                              Text('Modifier'),
+                              const Icon(Icons.edit_outlined, size: 20),
+                              const SizedBox(width: 8),
+                              Text(context.tr('edit')),
                             ],
                           ),
                         ),
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: 'delete',
                           child: Row(
                             children: [
-                              Icon(Icons.delete_outline, size: 20, color: Colors.red),
-                              SizedBox(width: 8),
-                              Text('Supprimer', style: TextStyle(color: Colors.red)),
+                              const Icon(Icons.delete_outline, size: 20, color: Colors.red),
+                              const SizedBox(width: 8),
+                              Text(context.tr('delete'), style: const TextStyle(color: Colors.red)),
                             ],
                           ),
                         ),

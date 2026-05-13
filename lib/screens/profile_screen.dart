@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/auth_provider.dart';
+import '../providers/language_provider.dart';
 import '../providers/post_provider.dart';
+import '../utils/app_strings.dart';
 import '../utils/constants.dart';
 import '../widgets/post_card.dart';
 import '../models/post.dart';
@@ -61,6 +63,116 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return _userPosts.fold(0, (sum, post) => sum + post.likesCount);
   }
 
+  void _showSnack(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  String _accountErrorMessage(String error) {
+    if (error == 'invalid_current_password') {
+      return context.tr('invalidCurrentPassword');
+    }
+    if (error == 'data_deletion_request_failed') {
+      return context.tr('dataDeletionRequestFailed');
+    }
+    return context.tr('deleteAccountFailed');
+  }
+
+  Future<void> _showDeleteAccountDialog() async {
+    final passwordController = TextEditingController();
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(context.tr('deleteAccountTitle')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(context.tr('deleteAccountMessage')),
+              const SizedBox(height: 16),
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: InputDecoration(labelText: context.tr('currentPassword')),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(context.tr('cancel')),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(context.tr('delete'), style: const TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+
+    final password = passwordController.text.trim();
+    passwordController.dispose();
+
+    if (confirmed != true || password.isEmpty) return;
+
+    final error = await context.read<AuthProvider>().deleteAccount(password);
+    if (!mounted) return;
+
+    if (error == null) {
+      _showSnack(context.tr('deleteAccountSuccess'));
+    } else {
+      _showSnack(_accountErrorMessage(error));
+    }
+  }
+
+  Future<void> _showDataDeletionRequestDialog() async {
+    final reasonController = TextEditingController();
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(context.tr('requestDataDeletionTitle')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(context.tr('requestDataDeletionMessage')),
+              const SizedBox(height: 16),
+              TextField(
+                controller: reasonController,
+                minLines: 2,
+                maxLines: 4,
+                decoration: InputDecoration(labelText: context.tr('reason')),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(context.tr('cancel')),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(context.tr('sendRequest')),
+            ),
+          ],
+        );
+      },
+    );
+
+    final reason = reasonController.text.trim();
+    reasonController.dispose();
+
+    if (confirmed != true) return;
+
+    final error = await context.read<AuthProvider>().requestDataDeletion(reason);
+    if (!mounted) return;
+
+    _showSnack(error == null ? context.tr('dataDeletionRequestSent') : _accountErrorMessage(error));
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
@@ -69,7 +181,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final totalLikes = _getTotalLikes();
 
     if (_isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    if (_user == null) return const Scaffold(body: Center(child: Text('Utilisateur non trouvé')));
+    if (_user == null) return Scaffold(body: Center(child: Text(context.tr('userNotFound'))));
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -94,9 +206,63 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     MaterialPageRoute(builder: (context) => const EditProfileScreen()),
                   ),
                 ),
+              PopupMenuButton<AppLanguage>(
+                tooltip: context.tr('language'),
+                icon: const Icon(Icons.language_rounded),
+                onSelected: (language) => context.read<LanguageProvider>().setLanguage(language),
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: AppLanguage.fr,
+                    child: Text(context.tr('french')),
+                  ),
+                  PopupMenuItem(
+                    value: AppLanguage.en,
+                    child: Text(context.tr('english')),
+                  ),
+                ],
+              ),
+              if (isMe)
+                PopupMenuButton<String>(
+                  tooltip: context.tr('accountActions'),
+                  icon: const Icon(Icons.manage_accounts_rounded),
+                  onSelected: (value) {
+                    if (value == 'data_deletion') {
+                      _showDataDeletionRequestDialog();
+                    } else if (value == 'delete_account') {
+                      _showDeleteAccountDialog();
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'data_deletion',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.privacy_tip_outlined, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(child: Text(context.tr('requestDataDeletion'))),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'delete_account',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.delete_forever_outlined, size: 20, color: Colors.red),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              context.tr('deleteAccount'),
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               if (isMe)
                 IconButton(
-                  tooltip: 'Déconnexion',
+                  tooltip: context.tr('logout'),
                   icon: const Icon(Icons.logout_rounded),
                   onPressed: () => authProvider.logout(),
                 ),
@@ -163,7 +329,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             MaterialPageRoute(builder: (context) => const EditProfileScreen()),
                           ),
                           icon: const Icon(Icons.add_circle_outline),
-                          label: const Text('Ajouter une biographie'),
+                          label: Text(context.tr('addBio')),
                         ),
                       const SizedBox(height: 16),
                       Row(
@@ -172,8 +338,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           const SizedBox(width: 8),
                           Text(
                             _user!.createdAt != null
-                                ? 'Rejoint en ${DateFormat.yMMMM().format(_user!.createdAt!)}'
-                                : 'Date d\'inscription inconnue',
+                                ? '${context.tr('joinedIn')} ${DateFormat.yMMMM().format(_user!.createdAt!)}'
+                                : context.tr('unknownJoinDate'),
                             style: TextStyle(color: colorScheme.secondary, fontWeight: FontWeight.w500),
                           ),
                         ],
@@ -186,7 +352,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Icon(Icons.article_rounded, color: colorScheme.primary, size: 20),
                           const SizedBox(width: 8),
                           Text(
-                            isMe ? 'Mes Publications' : 'Publications',
+                            isMe ? context.tr('myPosts') : context.tr('posts'),
                             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                         ],
@@ -215,9 +381,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       Icon(Icons.eco_rounded, color: colorScheme.primary, size: 30),
                       const SizedBox(height: 10),
-                      const Text(
-                        'Aucune publication pour le moment',
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                      Text(
+                        context.tr('noPostsYet'),
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
@@ -432,9 +598,9 @@ class _ProfileHeader extends StatelessWidget {
             top: 218,
             child: Row(
               children: [
-                _StatItem(label: 'Posts', value: '$postsCount'),
+                _StatItem(label: context.tr('posts'), value: '$postsCount'),
                 const SizedBox(width: 10),
-                _StatItem(label: 'Likes', value: '$totalLikes'),
+                _StatItem(label: context.tr('likes'), value: '$totalLikes'),
               ],
             ),
           ),

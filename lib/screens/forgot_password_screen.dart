@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../utils/app_strings.dart';
 import 'reset_password_screen.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -29,28 +30,28 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
       );
     } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to send reset code')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.tr('sendCodeFailed'))));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Forgot Password')),
+      appBar: AppBar(title: Text(context.tr('forgotPasswordTitle'))),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            const Text('Enter your email to receive a reset code.'),
+            Text(context.tr('forgotPasswordHelp')),
             const SizedBox(height: 16),
             TextField(
               controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
+              decoration: InputDecoration(labelText: context.tr('email')),
             ),
             const SizedBox(height: 24),
             _isLoading
                 ? const CircularProgressIndicator()
-                : ElevatedButton(onPressed: _submit, child: const Text('Send Code')),
+                : ElevatedButton(onPressed: _submit, child: Text(context.tr('sendCode'))),
           ],
         ),
       ),
