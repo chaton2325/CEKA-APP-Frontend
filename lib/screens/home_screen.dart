@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../providers/post_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/post_card.dart';
+import '../widgets/skeleton_post.dart';
 import 'create_post_screen.dart';
 import 'profile_screen.dart';
 import 'notification_screen.dart';
@@ -29,108 +30,52 @@ class _HomeScreenState extends State<HomeScreen> {
     const ProfileScreen(),
   ];
 
-  Future<void> _launchTicketUrl() async {
-    const url = 'https://www.ebyaceka.org/register/form';
-    if (Platform.isIOS) {
-      if (await canLaunchUrl(Uri.parse(url))) {
-        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-      }
-    } else {
-      if (context.mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => TicketWebViewScreen(url: url)),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final notificationProvider = Provider.of<NotificationProvider>(context);
 
     return Scaffold(
-      extendBody: true, // Important for floating nav bar
       backgroundColor: colorScheme.surface,
       body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 260),
-        switchInCurve: Curves.easeOutCubic,
-        switchOutCurve: Curves.easeInCubic,
-        child: KeyedSubtree(
-          key: ValueKey(_currentIndex),
-          child: _pages[_currentIndex],
-        ),
+        duration: const Duration(milliseconds: 300),
+        child: _pages[_currentIndex],
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.96),
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: colorScheme.primary.withOpacity(0.14),
-                blurRadius: 24,
-                offset: const Offset(0, 12),
-              ),
-            ],
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (index) {
+          setState(() => _currentIndex = index);
+        },
+        destinations: [
+          NavigationDestination(
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home_rounded),
+            label: context.tr('home'),
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: NavigationBar(
-              backgroundColor: Colors.white.withOpacity(0.96),
-              elevation: 0,
-              indicatorColor: colorScheme.primary.withOpacity(0.14),
-              selectedIndex: _currentIndex,
-              onDestinationSelected: (index) {
-                if (index == 3) {
-                  _launchTicketUrl();
-                } else {
-                  setState(() => _currentIndex = index);
-                }
-              },
-              destinations: [
-                NavigationDestination(
-                  icon: const Icon(Icons.home_outlined),
-                  selectedIcon: const Icon(Icons.home_rounded),
-                  label: context.tr('home'),
-                ),
-                NavigationDestination(
-                  icon: Badge(
-                    isLabelVisible: notificationProvider.unreadCount > 0,
-                    label: Text('${notificationProvider.unreadCount}'),
-                    child: const Icon(Icons.notifications_none_rounded),
-                  ),
-                  selectedIcon: const Icon(Icons.notifications_rounded),
-                  label: context.tr('alerts'),
-                ),
-                NavigationDestination(
-                  icon: const Icon(Icons.person_outline_rounded),
-                  selectedIcon: const Icon(Icons.person_rounded),
-                  label: context.tr('profile'),
-                ),
-                NavigationDestination(
-                  icon: const Icon(Icons.confirmation_number_outlined),
-                  selectedIcon: const Icon(Icons.confirmation_number_rounded),
-                  label: context.tr('ticket'),
-                ),
-              ],
+          NavigationDestination(
+            icon: Badge(
+              isLabelVisible: notificationProvider.unreadCount > 0,
+              label: Text('${notificationProvider.unreadCount}'),
+              child: const Icon(Icons.notifications_none_rounded),
             ),
+            selectedIcon: const Icon(Icons.notifications_rounded),
+            label: context.tr('alerts'),
           ),
-        ),
+          NavigationDestination(
+            icon: const Icon(Icons.person_outline_rounded),
+            selectedIcon: const Icon(Icons.person_rounded),
+            label: context.tr('profile'),
+          ),
+        ],
       ),
       floatingActionButton: _currentIndex == 0 
-          ? FloatingActionButton(
+          ? FloatingActionButton.extended(
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const CreatePostScreen()),
               ),
-              backgroundColor: colorScheme.primary,
-              foregroundColor: Colors.white,
-              elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-              child: const Icon(Icons.add_rounded),
+              icon: const Icon(Icons.add_rounded),
+              label: Text(context.tr('post')),
             )
           : null,
     );
@@ -181,7 +126,6 @@ class _FeedPageState extends State<_FeedPage> {
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: colorScheme.surface,
         title: const Text('CEKA'),
         actions: [
           IconButton(
@@ -193,6 +137,7 @@ class _FeedPageState extends State<_FeedPage> {
               );
             },
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: RefreshIndicator(
@@ -202,32 +147,33 @@ class _FeedPageState extends State<_FeedPage> {
             await Provider.of<NotificationProvider>(context, listen: false).fetchNotifications();
           }
         },
-        color: colorScheme.primary,
-        child: postProvider.isLoading && postProvider.posts.isEmpty
-            ? const Center(child: CircularProgressIndicator())
-            : ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 140),
-                itemCount: postProvider.posts.length + 1 + (postProvider.isLoadingMore ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return const _FeedHeader();
-                  }
+        child: ListView.builder(
+          controller: _scrollController,
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+          itemCount: postProvider.isLoading && postProvider.posts.isEmpty 
+              ? 5 // Show 5 skeletons while loading initial data
+              : postProvider.posts.length + 1 + (postProvider.isLoadingMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (postProvider.isLoading && postProvider.posts.isEmpty) {
+              if (index == 0) return const _FeedHeader();
+              return const SkeletonPost();
+            }
 
-                  final postIndex = index - 1;
-                  if (postIndex >= postProvider.posts.length) {
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      child: Center(child: CircularProgressIndicator()),
-                    );
-                  }
+            if (index == 0) {
+              return const _FeedHeader();
+            }
 
-                  return _AnimatedPostItem(
-                    index: postIndex,
-                    child: PostCard(post: postProvider.posts[postIndex]),
-                  );
-                },
-              ),
+            final postIndex = index - 1;
+            if (postIndex >= postProvider.posts.length) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            return PostCard(post: postProvider.posts[postIndex]);
+          },
+        ),
       ),
     );
   }
@@ -236,95 +182,117 @@ class _FeedPageState extends State<_FeedPage> {
 class _FeedHeader extends StatelessWidget {
   const _FeedHeader();
 
+  Future<void> _launchTicketUrl(BuildContext context) async {
+    const url = 'https://www.ebyaceka.org/register/form';
+    if (Platform.isIOS) {
+      if (await canLaunchUrl(Uri.parse(url))) {
+        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+      }
+    } else {
+      if (context.mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => TicketWebViewScreen(url: url)),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 420),
-      curve: Curves.easeOutCubic,
-      builder: (context, value, child) {
-        return Opacity(
-          opacity: value,
-          child: Transform.translate(
-            offset: Offset(0, 14 * (1 - value)),
-            child: child,
-          ),
-        );
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 14),
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: colorScheme.primary,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: colorScheme.primary.withOpacity(0.18),
-              blurRadius: 24,
-              offset: const Offset(0, 12),
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [colorScheme.primary, colorScheme.secondary],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.16),
-                borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: colorScheme.primary.withOpacity(0.2),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
               ),
-              child: const Icon(Icons.eco_rounded, color: Colors.white),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.tr('communityFeed'),
-                    style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    context.tr('feedSubtitle'),
-                    style: const TextStyle(color: Color(0xDFFFFFFF), fontSize: 13, fontWeight: FontWeight.w500),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _AnimatedPostItem extends StatelessWidget {
-  final int index;
-  final Widget child;
-
-  const _AnimatedPostItem({required this.index, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return TweenAnimationBuilder<double>(
-      key: ValueKey(index),
-      tween: Tween(begin: 0, end: 1),
-      duration: Duration(milliseconds: 260 + (index % 6) * 35),
-      curve: Curves.easeOutCubic,
-      builder: (context, value, child) {
-        return Opacity(
-          opacity: value,
-          child: Transform.translate(
-            offset: Offset(0, 18 * (1 - value)),
-            child: child,
+            ],
           ),
-        );
-      },
-      child: child,
+          child: Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(Icons.eco_rounded, color: Colors.white, size: 28),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.tr('communityFeed'),
+                      style: const TextStyle(
+                        color: Colors.white, 
+                        fontSize: 20, 
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      context.tr('feedSubtitle'),
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.9), 
+                        fontSize: 13, 
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        InkWell(
+          onTap: () => _launchTicketUrl(context),
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: colorScheme.tertiary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: colorScheme.tertiary.withOpacity(0.2)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.confirmation_number_rounded, color: colorScheme.tertiary),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    context.tr('buyTicket'),
+                    style: TextStyle(
+                      color: colorScheme.tertiary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+                Icon(Icons.arrow_forward_ios_rounded, size: 16, color: colorScheme.tertiary),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

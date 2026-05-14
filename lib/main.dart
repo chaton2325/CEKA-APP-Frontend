@@ -41,41 +41,48 @@ class MyApp extends StatelessWidget {
               colorScheme: ColorScheme.fromSeed(
                 seedColor: const Color(0xFF1B8F4D),
                 primary: const Color(0xFF1B8F4D),
-                secondary: const Color(0xFF37624A),
-                surface: const Color(0xFFF2F7F3),
-                surfaceVariant: const Color(0xFFE3EFE7),
                 onPrimary: Colors.white,
+                secondary: const Color(0xFF2E7D32),
                 onSecondary: Colors.white,
-                onSurface: Colors.black,
+                tertiary: const Color(0xFF1565C0),
+                surface: const Color(0xFFF8FBF9),
+                onSurface: const Color(0xFF102118),
+                surfaceContainerHighest: const Color(0xFFE8F1EB),
               ),
-              scaffoldBackgroundColor: const Color(0xFFF2F7F3),
+              scaffoldBackgroundColor: const Color(0xFFF8FBF9),
               appBarTheme: const AppBarTheme(
-                backgroundColor: Color(0xFFF2F7F3),
+                backgroundColor: Color(0xFFF8FBF9),
                 foregroundColor: Color(0xFF102118),
                 elevation: 0,
-                centerTitle: true,
+                centerTitle: false,
                 titleTextStyle: TextStyle(
                   color: Color(0xFF102118),
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
                 ),
               ),
               inputDecorationTheme: InputDecorationTheme(
                 filled: true,
                 fillColor: Colors.white,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF795548)),
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: Colors.grey.shade200),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: Colors.grey.shade200),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF2E7D32), width: 2),
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Color(0xFF1B8F4D), width: 2),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Colors.redAccent, width: 1),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15),
               ),
               elevatedButtonTheme: ElevatedButtonThemeData(
                 style: ElevatedButton.styleFrom(
@@ -83,18 +90,35 @@ class MyApp extends StatelessWidget {
                   foregroundColor: Colors.white,
                   minimumSize: const Size.fromHeight(56),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  elevation: 2,
-                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  elevation: 0,
+                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                 ),
               ),
               cardTheme: CardThemeData(
                 color: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(color: Colors.grey.withOpacity(0.1)),
                 ),
+              ),
+              navigationBarTheme: NavigationBarThemeData(
+                backgroundColor: Colors.white,
+                indicatorColor: const Color(0xFF1B8F4D).withOpacity(0.1),
+                labelTextStyle: MaterialStateProperty.resolveWith((states) {
+                  if (states.contains(MaterialState.selected)) {
+                    return const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF1B8F4D));
+                  }
+                  return TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.grey.shade600);
+                }),
+                iconTheme: MaterialStateProperty.resolveWith((states) {
+                  if (states.contains(MaterialState.selected)) {
+                    return const IconThemeData(color: Color(0xFF1B8F4D), size: 26);
+                  }
+                  return IconThemeData(color: Colors.grey.shade600, size: 24);
+                }),
               ),
             ),
             home: auth.isAuthenticated ? const HomeScreen() : const LoginScreen(),

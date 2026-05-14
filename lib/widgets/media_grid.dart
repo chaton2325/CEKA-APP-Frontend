@@ -23,21 +23,21 @@ class MediaGrid extends StatelessWidget {
       } else if (displayImages.length == 2) {
         return Row(
           children: [
-            Expanded(child: _buildImage(context, displayImages[0], images, 0, constraints.maxWidth / 2, 200)),
-            const SizedBox(width: 4),
-            Expanded(child: _buildImage(context, displayImages[1], images, 1, constraints.maxWidth / 2, 200)),
+            Expanded(child: _buildImage(context, displayImages[0], images, 0, (constraints.maxWidth - 8) / 2, 200)),
+            const SizedBox(width: 8),
+            Expanded(child: _buildImage(context, displayImages[1], images, 1, (constraints.maxWidth - 8) / 2, 200)),
           ],
         );
       } else if (displayImages.length == 3) {
         return Column(
           children: [
             _buildImage(context, displayImages[0], images, 0, constraints.maxWidth, 200),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             Row(
               children: [
-                Expanded(child: _buildImage(context, displayImages[1], images, 1, constraints.maxWidth / 2, 150)),
-                const SizedBox(width: 4),
-                Expanded(child: _buildImage(context, displayImages[2], images, 2, constraints.maxWidth / 2, 150)),
+                Expanded(child: _buildImage(context, displayImages[1], images, 1, (constraints.maxWidth - 8) / 2, 150)),
+                const SizedBox(width: 8),
+                Expanded(child: _buildImage(context, displayImages[2], images, 2, (constraints.maxWidth - 8) / 2, 150)),
               ],
             ),
           ],
@@ -48,15 +48,15 @@ class MediaGrid extends StatelessWidget {
             for (var i = 0; i < displayImages.length; i += 2) ...[
               Row(
                 children: [
-                  Expanded(child: _buildImage(context, displayImages[i], images, i, constraints.maxWidth / 2, 150)),
+                  Expanded(child: _buildImage(context, displayImages[i], images, i, (constraints.maxWidth - 8) / 2, 150)),
                   if (i + 1 < displayImages.length) ...[
-                    const SizedBox(width: 4),
-                    Expanded(child: _buildImage(context, displayImages[i + 1], images, i + 1, constraints.maxWidth / 2, 150)),
+                    const SizedBox(width: 8),
+                    Expanded(child: _buildImage(context, displayImages[i + 1], images, i + 1, (constraints.maxWidth - 8) / 2, 150)),
                   ] else
                     const Spacer(),
                 ],
               ),
-              if (i + 2 < displayImages.length) const SizedBox(height: 4),
+              if (i + 2 < displayImages.length) const SizedBox(height: 8),
             ],
           ],
         );
@@ -65,17 +65,17 @@ class MediaGrid extends StatelessWidget {
           children: [
             Row(
               children: [
-                Expanded(child: _buildImage(context, displayImages[0], images, 0, constraints.maxWidth / 2, 150)),
-                const SizedBox(width: 4),
-                Expanded(child: _buildImage(context, displayImages[1], images, 1, constraints.maxWidth / 2, 150)),
+                Expanded(child: _buildImage(context, displayImages[0], images, 0, (constraints.maxWidth - 8) / 2, 150)),
+                const SizedBox(width: 8),
+                Expanded(child: _buildImage(context, displayImages[1], images, 1, (constraints.maxWidth - 8) / 2, 150)),
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             Row(
               children: [
-                Expanded(child: _buildImage(context, displayImages[2], images, 2, constraints.maxWidth / 2, 150)),
-                const SizedBox(width: 4),
-                Expanded(child: _buildImage(context, displayImages[3], images, 3, constraints.maxWidth / 2, 150)),
+                Expanded(child: _buildImage(context, displayImages[2], images, 2, (constraints.maxWidth - 8) / 2, 150)),
+                const SizedBox(width: 8),
+                Expanded(child: _buildImage(context, displayImages[3], images, 3, (constraints.maxWidth - 8) / 2, 150)),
               ],
             ),
           ],

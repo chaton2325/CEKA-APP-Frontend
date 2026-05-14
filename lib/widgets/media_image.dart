@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:shimmer/shimmer.dart';
 import '../models/media.dart';
 import '../utils/constants.dart';
 
@@ -57,17 +57,15 @@ class _ImagePlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: height,
-      color: Colors.grey.shade200,
-      alignment: Alignment.center,
-      child: SizedBox(
-        width: 22,
-        height: 22,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          color: Theme.of(context).colorScheme.primary,
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
         ),
       ),
     );
@@ -87,11 +85,11 @@ class _ImageError extends StatelessWidget {
     return Container(
       width: width,
       height: height,
-      color: colorScheme.surfaceVariant.withOpacity(0.6),
+      color: Colors.grey.shade100,
       alignment: Alignment.center,
       child: Icon(
-        Icons.broken_image_outlined,
-        color: colorScheme.secondary,
+        Icons.image_not_supported_outlined,
+        color: Colors.grey.shade400,
         size: 28,
       ),
     );
