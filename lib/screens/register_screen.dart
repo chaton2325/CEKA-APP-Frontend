@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import '../providers/auth_provider.dart';
 import '../providers/language_provider.dart';
 import '../utils/app_strings.dart';
@@ -133,12 +134,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       value!.length < 8 ? context.tr('passwordMin') : null,
                 ),
                 const SizedBox(height: 40),
-                auth.isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : ElevatedButton(
-                        onPressed: _register,
-                        child: Text(context.tr('register')),
-                      ),
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: auth.isLoading
+                      ? Shimmer.fromColors(
+                          baseColor: colorScheme.primary,
+                          highlightColor: colorScheme.primary.withOpacity(0.5),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: colorScheme.primary,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                        )
+                      : ElevatedButton(
+                          onPressed: _register,
+                          child: Text(context.tr('register')),
+                        ),
+                ),
                 const SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,

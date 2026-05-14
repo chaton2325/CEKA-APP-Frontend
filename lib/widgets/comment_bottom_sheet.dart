@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 import '../models/comment.dart';
 import '../providers/post_provider.dart';
 import '../providers/auth_provider.dart';
@@ -146,7 +147,18 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                 ),
                 const SizedBox(width: 12),
                 _isLoading
-                    ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
+                    ? Shimmer.fromColors(
+                        baseColor: colorScheme.primary,
+                        highlightColor: colorScheme.primary.withOpacity(0.5),
+                        child: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      )
                     : IconButton(
                         onPressed: _addComment,
                         icon: CircleAvatar(

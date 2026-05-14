@@ -11,6 +11,7 @@ import 'profile_screen.dart';
 import '../widgets/comment_bottom_sheet.dart';
 import '../widgets/media_grid.dart';
 import '../widgets/video_player_widget.dart';
+import '../widgets/skeleton_post_detail.dart';
 
 class PostDetailScreen extends StatefulWidget {
   final int postId;
@@ -72,7 +73,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       return Scaffold(
         backgroundColor: colorScheme.surface,
         appBar: AppBar(backgroundColor: colorScheme.surface),
-        body: const Center(child: CircularProgressIndicator()),
+        body: const SkeletonPostDetail(),
       );
     }
     

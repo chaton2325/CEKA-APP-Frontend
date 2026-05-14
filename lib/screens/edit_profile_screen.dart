@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import '../providers/auth_provider.dart';
 import '../utils/app_strings.dart';
 
@@ -66,7 +67,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         title: Text(context.tr('editProfile')),
         actions: [
           auth.isLoading
-              ? const Center(child: Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator(color: Colors.white)))
+              ? Shimmer.fromColors(
+                  baseColor: Colors.white,
+                  highlightColor: Colors.white.withOpacity(0.5),
+                  child: const Padding(
+                    padding: EdgeInsets.all(12.0),
+                    child: Icon(Icons.check, color: Colors.white),
+                  ),
+                )
               : IconButton(icon: const Icon(Icons.check), onPressed: _save),
         ],
       ),

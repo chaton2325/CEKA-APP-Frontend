@@ -165,9 +165,19 @@ class _FeedPageState extends State<_FeedPage> {
 
             final postIndex = index - 1;
             if (postIndex >= postProvider.posts.length) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 24),
-                child: Center(child: CircularProgressIndicator()),
+              return Container(
+                margin: const EdgeInsets.symmetric(vertical: 20),
+                height: 40,
+                child: Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary.withOpacity(0.5)),
+                    ),
+                  ),
+                ),
               );
             }
 

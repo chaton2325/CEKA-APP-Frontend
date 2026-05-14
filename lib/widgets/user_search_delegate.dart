@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import '../services/api_service.dart';
 import '../models/user.dart';
 import '../utils/constants.dart';
@@ -52,7 +53,18 @@ class UserSearchDelegate extends SearchDelegate {
       future: _apiService.searchUsers(query),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return ListView.builder(
+            itemCount: 10,
+            itemBuilder: (context, index) => Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: ListTile(
+                leading: const CircleAvatar(backgroundColor: Colors.white),
+                title: Container(width: 150, height: 12, color: Colors.white),
+                subtitle: Container(width: 200, height: 10, color: Colors.white),
+              ),
+            ),
+          );
         }
 
         if (snapshot.hasError) {

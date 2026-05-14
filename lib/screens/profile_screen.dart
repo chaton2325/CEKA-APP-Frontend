@@ -14,6 +14,7 @@ import '../models/user.dart';
 import '../models/media.dart';
 import 'edit_profile_screen.dart';
 import '../widgets/full_screen_media_viewer.dart';
+import '../widgets/skeleton_profile.dart';
 
 class ProfileScreen extends StatefulWidget {
   final int? userId;
@@ -184,7 +185,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final isMe = _user != null && _user!.id == authProvider.user?.id;
     final totalLikes = _getTotalLikes();
 
-    if (_isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (_isLoading) return const Scaffold(body: SkeletonProfile());
     if (_user == null) return Scaffold(body: Center(child: Text(context.tr('userNotFound'))));
 
     return Scaffold(

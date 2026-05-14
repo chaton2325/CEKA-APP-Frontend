@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import '../providers/auth_provider.dart';
 import '../utils/app_strings.dart';
 
@@ -57,9 +58,22 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               obscureText: true,
             ),
             const SizedBox(height: 24),
-            _isLoading
-                ? const CircularProgressIndicator()
-                : ElevatedButton(onPressed: _submit, child: Text(context.tr('resetPassword'))),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: _isLoading
+                  ? Shimmer.fromColors(
+                      baseColor: Theme.of(context).colorScheme.primary,
+                      highlightColor: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                    )
+                  : ElevatedButton(onPressed: _submit, child: Text(context.tr('resetPassword'))),
+            ),
           ],
         ),
       ),

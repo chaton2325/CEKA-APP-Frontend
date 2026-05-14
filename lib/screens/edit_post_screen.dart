@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shimmer/shimmer.dart';
 import '../models/post.dart';
 import '../models/media.dart';
 import '../providers/post_provider.dart';
@@ -152,7 +153,18 @@ class _EditPostScreenState extends State<EditPostScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: _isLoading
-                ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
+                ? Shimmer.fromColors(
+                    baseColor: colorScheme.primary,
+                    highlightColor: colorScheme.primary.withOpacity(0.5),
+                    child: Container(
+                      width: 80,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  )
                 : ElevatedButton(
                     onPressed: _submit,
                     style: ElevatedButton.styleFrom(
