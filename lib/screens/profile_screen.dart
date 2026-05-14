@@ -11,7 +11,9 @@ import '../widgets/post_card.dart';
 import '../widgets/skeleton_post.dart';
 import '../models/post.dart';
 import '../models/user.dart';
+import '../models/media.dart';
 import 'edit_profile_screen.dart';
+import '../widgets/full_screen_media_viewer.dart';
 
 class ProfileScreen extends StatefulWidget {
   final int? userId;
@@ -500,40 +502,51 @@ class _ProfileHeader extends StatelessWidget {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(20),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  if (user.bannerPhotoUrl != null)
-                    Image.network(
-                      '${AppConstants.baseUrl}${user.bannerPhotoUrl}',
-                      fit: BoxFit.cover,
-                    )
-                  else
+              child: GestureDetector(
+                onTap: user.bannerPhotoUrl != null ? () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => FullScreenMediaViewer(
+                      media: [Media(id: 0, url: user.bannerPhotoUrl!, mediaType: MediaType.image, filename: 'banner.jpg', position: 0)],
+                      initialIndex: 0,
+                    )),
+                  );
+                } : null,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (user.bannerPhotoUrl != null)
+                      Image.network(
+                        '${AppConstants.baseUrl}${user.bannerPhotoUrl}',
+                        fit: BoxFit.cover,
+                      )
+                    else
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.bottomLeft,
+                            end: Alignment.topRight,
+                            colors: [
+                              colorScheme.primary,
+                              colorScheme.secondary,
+                            ],
+                          ),
+                        ),
+                      ),
                     DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          begin: Alignment.bottomLeft,
-                          end: Alignment.topRight,
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
                           colors: [
-                            colorScheme.primary,
-                            colorScheme.secondary,
+                            Colors.black.withOpacity(0.4),
+                            Colors.transparent,
                           ],
                         ),
                       ),
                     ),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                        colors: [
-                          Colors.black.withOpacity(0.4),
-                          Colors.transparent,
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -546,15 +559,26 @@ class _ProfileHeader extends StatelessWidget {
                 color: Colors.white,
                 shape: BoxShape.circle,
               ),
-              child: CircleAvatar(
-                radius: 50,
-                backgroundColor: colorScheme.surfaceVariant,
-                backgroundImage: user.profilePhotoUrl != null
-                    ? NetworkImage('${AppConstants.baseUrl}${user.profilePhotoUrl}')
-                    : null,
-                child: user.profilePhotoUrl == null
-                    ? Icon(Icons.person_rounded, size: 50, color: colorScheme.primary)
-                    : null,
+              child: GestureDetector(
+                onTap: user.profilePhotoUrl != null ? () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => FullScreenMediaViewer(
+                      media: [Media(id: 0, url: user.profilePhotoUrl!, mediaType: MediaType.image, filename: 'profile.jpg', position: 0)],
+                      initialIndex: 0,
+                    )),
+                  );
+                } : null,
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundColor: colorScheme.surfaceVariant,
+                  backgroundImage: user.profilePhotoUrl != null
+                      ? NetworkImage('${AppConstants.baseUrl}${user.profilePhotoUrl}')
+                      : null,
+                  child: user.profilePhotoUrl == null
+                      ? Icon(Icons.person_rounded, size: 50, color: colorScheme.primary)
+                      : null,
+                ),
               ),
             ),
           ),

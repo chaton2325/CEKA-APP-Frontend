@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../models/comment.dart';
 import '../providers/post_provider.dart';
 import '../providers/auth_provider.dart';
+import '../screens/profile_screen.dart';
 import '../utils/constants.dart';
 
 class CommentBottomSheet extends StatefulWidget {
@@ -174,12 +175,21 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(
-                radius: isReply ? 14 : 18,
-                backgroundImage: comment.author.profilePhotoUrl != null
-                    ? NetworkImage('${AppConstants.baseUrl}${comment.author.profilePhotoUrl}')
-                    : null,
-                child: comment.author.profilePhotoUrl == null ? const Icon(Icons.person, size: 18) : null,
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context); // Close bottom sheet
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ProfileScreen(userId: comment.author.id)),
+                  );
+                },
+                child: CircleAvatar(
+                  radius: isReply ? 14 : 18,
+                  backgroundImage: comment.author.profilePhotoUrl != null
+                      ? NetworkImage('${AppConstants.baseUrl}${comment.author.profilePhotoUrl}')
+                      : null,
+                  child: comment.author.profilePhotoUrl == null ? const Icon(Icons.person, size: 18) : null,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -188,7 +198,16 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                   children: [
                     Row(
                       children: [
-                        Text(comment.author.username, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pop(context); // Close bottom sheet
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => ProfileScreen(userId: comment.author.id)),
+                            );
+                          },
+                          child: Text(comment.author.username, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                        ),
                         const SizedBox(width: 8),
                         Text(DateFormat.yMMMd().format(comment.createdAt), style: TextStyle(fontSize: 11, color: colorScheme.secondary.withOpacity(0.6))),
                       ],

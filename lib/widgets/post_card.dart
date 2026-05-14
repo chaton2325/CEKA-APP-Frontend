@@ -9,8 +9,10 @@ import '../providers/post_provider.dart';
 import '../providers/auth_provider.dart';
 import '../models/media.dart';
 import '../screens/edit_post_screen.dart';
+import '../screens/profile_screen.dart';
 import 'comment_bottom_sheet.dart';
 import 'media_grid.dart';
+import 'full_screen_media_viewer.dart';
 
 class PostCard extends StatelessWidget {
   final Post post;
@@ -51,30 +53,42 @@ class PostCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  CircleAvatar(
-                    radius: 22,
-                    backgroundColor: colorScheme.primary.withOpacity(0.1),
-                    backgroundImage: post.author.profilePhotoUrl != null
-                        ? NetworkImage('${AppConstants.baseUrl}${post.author.profilePhotoUrl}')
-                        : null,
-                    child: post.author.profilePhotoUrl == null 
-                        ? Icon(Icons.person_rounded, color: colorScheme.primary) 
-                        : null,
+                  GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ProfileScreen(userId: post.author.id)),
+                    ),
+                    child: CircleAvatar(
+                      radius: 22,
+                      backgroundColor: colorScheme.primary.withOpacity(0.1),
+                      backgroundImage: post.author.profilePhotoUrl != null
+                          ? NetworkImage('${AppConstants.baseUrl}${post.author.profilePhotoUrl}')
+                          : null,
+                      child: post.author.profilePhotoUrl == null 
+                          ? Icon(Icons.person_rounded, color: colorScheme.primary) 
+                          : null,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          post.author.username,
-                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, letterSpacing: -0.3),
-                        ),
-                        Text(
-                          DateFormat.yMMMd().add_jm().format(post.createdAt),
-                          style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.w500),
-                        ),
-                      ],
+                    child: GestureDetector(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ProfileScreen(userId: post.author.id)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            post.author.username,
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, letterSpacing: -0.3),
+                          ),
+                          Text(
+                            DateFormat.yMMMd().add_jm().format(post.createdAt),
+                            style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   if (authProvider.user?.id == post.author.id)
@@ -161,27 +175,39 @@ class PostCard extends StatelessWidget {
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children: post.media.where((m) => m.mediaType != MediaType.image).map((m) => Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: colorScheme.primary.withOpacity(0.1)),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          m.mediaType == MediaType.video ? Icons.play_circle_filled_rounded : Icons.audiotrack_rounded,
-                          size: 18,
-                          color: colorScheme.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          m.filename,
-                          style: TextStyle(fontSize: 12, color: colorScheme.primary, fontWeight: FontWeight.w700),
-                        ),
-                      ],
+                  children: post.media.where((m) => m.mediaType != MediaType.image).map((m) => InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => FullScreenMediaViewer(
+                          media: post.media, 
+                          initialIndex: post.media.indexOf(m),
+                        )),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: colorScheme.primary.withOpacity(0.1)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            m.mediaType == MediaType.video ? Icons.play_circle_filled_rounded : Icons.audiotrack_rounded,
+                            size: 18,
+                            color: colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            m.filename,
+                            style: TextStyle(fontSize: 12, color: colorScheme.primary, fontWeight: FontWeight.w700),
+                          ),
+                        ],
+                      ),
                     ),
                   )).toList(),
                 ),

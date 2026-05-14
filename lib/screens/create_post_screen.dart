@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import '../providers/post_provider.dart';
 import '../utils/app_strings.dart';
 
@@ -14,8 +15,9 @@ class CreatePostScreen extends StatefulWidget {
 
 class _CreatePostScreenState extends State<CreatePostScreen> {
   final _contentController = TextEditingController();
-  List<File> _mediaFiles = [];
+  final List<File> _mediaFiles = [];
   bool _isLoading = false;
+  final ImagePicker _picker = ImagePicker();
 
   Future<void> _pickMedia() async {
     final result = await FilePicker.platform.pickFiles(
@@ -23,7 +25,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       type: FileType.custom,
       allowedExtensions: [
         'mp4', 'mov', 'webm', 'mkv', 
-        'mp3', 'wav', 'ogg', 'm4a', 'aac',
         'jpg', 'jpeg', 'png', 'webp'
       ],
     );
@@ -33,6 +34,80 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         _mediaFiles.addAll(result.paths.where((path) => path != null).map((path) => File(path!)));
       });
     }
+  }
+
+  Future<void> _takePhoto() async {
+    final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
+    if (photo != null) {
+      setState(() {
+        _mediaFiles.add(File(photo.path));
+      });
+    }
+  }
+
+  Future<void> _recordVideo() async {
+    final XFile? video = await _picker.pickVideo(source: ImageSource.camera);
+    if (video != null) {
+      setState(() {
+        _mediaFiles.add(File(video.path));
+      });
+    }
+  }
+
+  void _showMediaOptions() {
+    final colorScheme = Theme.of(context).colorScheme;
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              context.tr('addMedia'),
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _MediaActionTile(
+                  icon: Icons.camera_alt_rounded,
+                  label: context.tr('camera'),
+                  color: colorScheme.primary,
+                  onTap: () {
+                    Navigator.pop(context);
+                    _takePhoto();
+                  },
+                ),
+                _MediaActionTile(
+                  icon: Icons.videocam_rounded,
+                  label: context.tr('video'),
+                  color: Colors.redAccent,
+                  onTap: () {
+                    Navigator.pop(context);
+                    _recordVideo();
+                  },
+                ),
+                _MediaActionTile(
+                  icon: Icons.photo_library_rounded,
+                  label: context.tr('gallery'),
+                  color: Colors.blueAccent,
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickMedia();
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _submit() async {
@@ -103,8 +178,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                       physics: const NeverScrollableScrollPhysics(),
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 3,
-                        crossAxisSpacing: 8,
-                        mainAxisSpacing: 8,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
                       ),
                       itemCount: _mediaFiles.length,
                       itemBuilder: (context, index) {
@@ -113,8 +188,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                         
                         return Container(
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade200),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.grey.withOpacity(0.1)),
                           ),
                           clipBehavior: Clip.antiAlias,
                           child: Stack(
@@ -125,17 +200,17 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                               else
                                 Container(
                                   color: colorScheme.secondary.withOpacity(0.1),
-                                  child: Icon(Icons.description, color: colorScheme.secondary),
+                                  child: Icon(Icons.videocam_rounded, color: colorScheme.secondary),
                                 ),
                               Positioned(
-                                right: 4,
-                                top: 4,
+                                right: 6,
+                                top: 6,
                                 child: GestureDetector(
                                   onTap: () => setState(() => _mediaFiles.removeAt(index)),
                                   child: Container(
-                                    padding: const EdgeInsets.all(2),
+                                    padding: const EdgeInsets.all(4),
                                     decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
-                                    child: const Icon(Icons.close, size: 14, color: Colors.white),
+                                    child: const Icon(Icons.close, size: 16, color: Colors.white),
                                   ),
                                 ),
                               ),
@@ -150,29 +225,15 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           ),
           const Divider(height: 1),
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
             color: Colors.white,
             child: Row(
               children: [
                 _MediaButton(
-                  icon: Icons.image_outlined,
+                  icon: Icons.add_photo_alternate_rounded,
                   label: context.tr('media'),
-                  onTap: _pickMedia,
+                  onTap: _showMediaOptions,
                   color: colorScheme.primary,
-                ),
-                const SizedBox(width: 16),
-                _MediaButton(
-                  icon: Icons.videocam_outlined,
-                  label: context.tr('video'),
-                  onTap: _pickMedia,
-                  color: colorScheme.secondary,
-                ),
-                const SizedBox(width: 16),
-                _MediaButton(
-                  icon: Icons.mic_none_rounded,
-                  label: context.tr('audio'),
-                  onTap: _pickMedia,
-                  color: Colors.orange,
                 ),
               ],
             ),
@@ -197,18 +258,61 @@ class _MediaButton extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: color.withOpacity(0.08),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 20, color: color),
-            const SizedBox(width: 6),
-            Text(label, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 13)),
+            Icon(icon, size: 24, color: color),
+            const SizedBox(width: 10),
+            Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 14)),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _MediaActionTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _MediaActionTile({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 30),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.grey.shade800,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+            ),
+          ),
+        ],
       ),
     );
   }
