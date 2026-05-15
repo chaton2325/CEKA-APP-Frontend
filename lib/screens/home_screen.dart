@@ -23,12 +23,23 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+  final PageController _pageController = PageController();
   
-  final List<Widget> _pages = [
-    const _FeedPage(),
-    const NotificationScreen(),
-    const ProfileScreen(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    // Refresh data on start
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<PostProvider>(context, listen: false).fetchPosts();
+      Provider.of<NotificationProvider>(context, listen: false).fetchNotifications();
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,40 +48,40 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
+      body: PageView(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(), // Only navigate via NavBars
+        children: const [
+          _FeedPage(),
+          NotificationScreen(),
+          ProfileScreen(),
+        ],
+        onPageChanged: (index) {
+          setState(() => _currentIndex = index);
+        },
       ),
-      bottomNavigationBar: _ModernNavBar(
+      extendBody: true, // Allow body to flow under the custom bar
+      bottomNavigationBar: _ModernGreenNavBar(
         currentIndex: _currentIndex,
         onTap: (index) {
-          setState(() => _currentIndex = index);
+          _pageController.animateToPage(
+            index,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeOutBack,
+          );
         },
         unreadNotifications: notificationProvider.unreadCount,
       ),
-      floatingActionButton: _currentIndex == 0 
-          ? FloatingActionButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CreatePostScreen()),
-              ),
-              backgroundColor: colorScheme.primary,
-              foregroundColor: Colors.white,
-              elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              child: const Icon(Icons.add_rounded, size: 28),
-            )
-          : null,
     );
   }
 }
 
-class _ModernNavBar extends StatelessWidget {
+class _ModernGreenNavBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
   final int unreadNotifications;
 
-  const _ModernNavBar({
+  const _ModernGreenNavBar({
     required this.currentIndex,
     required this.onTap,
     required this.unreadNotifications,
@@ -82,45 +93,60 @@ class _ModernNavBar extends StatelessWidget {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Container(
+      margin: EdgeInsets.fromLTRB(20, 0, 20, bottomPadding > 0 ? bottomPadding : 20),
+      height: 70,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        color: const Color(0xFF102118), // Deep dark green
+        borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.primary.withOpacity(0.08),
+            color: Colors.black.withOpacity(0.3),
             blurRadius: 20,
-            offset: const Offset(0, -5),
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-      padding: EdgeInsets.fromLTRB(16, 12, 16, bottomPadding > 0 ? bottomPadding : 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+      child: Stack(
         children: [
-          _NavBarItem(
-            icon: Icons.home_rounded,
-            outlineIcon: Icons.home_outlined,
-            label: context.tr('home'),
-            isSelected: currentIndex == 0,
-            onTap: () => onTap(0),
-            color: colorScheme.primary,
+          // Animated Selection Background
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.elasticOut,
+            left: (MediaQuery.of(context).size.width - 40) / 3 * currentIndex + 5,
+            top: 10,
+            child: Container(
+              width: (MediaQuery.of(context).size.width - 40) / 3 - 10,
+              height: 50,
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: colorScheme.primary.withOpacity(0.5), width: 1.5),
+              ),
+            ),
           ),
-          _NavBarItem(
-            icon: Icons.notifications_rounded,
-            outlineIcon: Icons.notifications_none_rounded,
-            label: context.tr('alerts'),
-            isSelected: currentIndex == 1,
-            onTap: () => onTap(1),
-            color: colorScheme.primary,
-            badgeCount: unreadNotifications,
-          ),
-          _NavBarItem(
-            icon: Icons.person_rounded,
-            outlineIcon: Icons.person_outline_rounded,
-            label: context.tr('profile'),
-            isSelected: currentIndex == 2,
-            onTap: () => onTap(2),
-            color: colorScheme.primary,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _GreenNavItem(
+                icon: Icons.grid_view_rounded,
+                label: context.tr('home'),
+                isSelected: currentIndex == 0,
+                onTap: () => onTap(0),
+              ),
+              _GreenNavItem(
+                icon: Icons.notifications_active_rounded,
+                label: context.tr('alerts'),
+                isSelected: currentIndex == 1,
+                onTap: () => onTap(1),
+                badgeCount: unreadNotifications,
+              ),
+              _GreenNavItem(
+                icon: Icons.person_rounded,
+                label: context.tr('profile'),
+                isSelected: currentIndex == 2,
+                onTap: () => onTap(2),
+              ),
+            ],
           ),
         ],
       ),
@@ -128,87 +154,73 @@ class _ModernNavBar extends StatelessWidget {
   }
 }
 
-class _NavBarItem extends StatelessWidget {
+class _GreenNavItem extends StatelessWidget {
   final IconData icon;
-  final IconData outlineIcon;
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
-  final Color color;
   final int badgeCount;
 
-  const _NavBarItem({
+  const _GreenNavItem({
     required this.icon,
-    required this.outlineIcon,
     required this.label,
     required this.isSelected,
     required this.onTap,
-    required this.color,
     this.badgeCount = 0,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.12) : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Stack(
               clipBehavior: Clip.none,
               children: [
-                Icon(
-                  isSelected ? icon : outlineIcon,
-                  color: isSelected ? color : Colors.grey.shade500,
-                  size: 26,
+                AnimatedScale(
+                  duration: const Duration(milliseconds: 300),
+                  scale: isSelected ? 1.2 : 1.0,
+                  child: Icon(
+                    icon,
+                    color: isSelected ? Colors.white : Colors.grey.shade600,
+                    size: 26,
+                  ),
                 ),
                 if (badgeCount > 0)
                   Positioned(
-                    right: -2,
-                    top: -2,
+                    right: -5,
+                    top: -5,
                     child: Container(
                       padding: const EdgeInsets.all(4),
                       decoration: const BoxDecoration(
                         color: Colors.redAccent,
                         shape: BoxShape.circle,
                       ),
-                      constraints: const BoxConstraints(
-                        minWidth: 16,
-                        minHeight: 16,
-                      ),
+                      constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                       child: Text(
                         '$badgeCount',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ),
               ],
             ),
-            if (isSelected) ...[
-              const SizedBox(width: 8),
-              Text(
+            const SizedBox(height: 4),
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 300),
+              opacity: isSelected ? 1.0 : 0.0,
+              child: Text(
                 label,
-                style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 14,
-                  letterSpacing: -0.2,
-                ),
+                style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800),
               ),
-            ],
+            ),
           ],
         ),
       ),
@@ -284,7 +296,7 @@ class _FeedPageState extends State<_FeedPage> {
         onRefresh: _refreshData,
         child: ListView.builder(
           controller: _scrollController,
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 100), // Extra padding for the floating nav bar
           itemCount: _calculateItemCount(postProvider),
           itemBuilder: (context, index) {
             // Initial Loading Skeletons
@@ -311,15 +323,26 @@ class _FeedPageState extends State<_FeedPage> {
 
             // Loading More Indicator (Shimmer)
             if (postProvider.isLoadingMore) {
-              return Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: const SkeletonPost(),
+              return const Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: SkeletonPost(),
               );
             }
 
             return const SizedBox.shrink();
           },
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const CreatePostScreen()),
+        ),
+        backgroundColor: colorScheme.primary,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: const Icon(Icons.add_rounded, size: 28),
       ),
     );
   }
@@ -342,7 +365,7 @@ class _FeedPageState extends State<_FeedPage> {
           Icon(Icons.feed_outlined, size: 64, color: Colors.grey.shade300),
           const SizedBox(height: 24),
           Text(
-            context.tr('noPostsYet') ?? 'Aucune publication pour le moment',
+            context.tr('noPostsYet'),
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.grey.shade400),
           ),
           const SizedBox(height: 12),

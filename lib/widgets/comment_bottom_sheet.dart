@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../models/comment.dart';
 import '../providers/post_provider.dart';
 import '../providers/auth_provider.dart';
@@ -101,7 +102,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                 : ListView.builder(
                     padding: const EdgeInsets.all(20),
                     itemCount: _comments.length,
-                    itemBuilder: (context, index) => _buildCommentTile(_comments[index]),
+                    itemBuilder: (context, index) => _buildCommentTile(_comments[index], index: index),
                   ),
           ),
           if (_replyToUser != null)
@@ -174,7 +175,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
     );
   }
 
-  Widget _buildCommentTile(Comment comment, {bool isReply = false}) {
+  Widget _buildCommentTile(Comment comment, {bool isReply = false, int index = 0}) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final isLiked = authProvider.user != null && comment.likedBy.any((u) => u.id == authProvider.user!.id);
     final colorScheme = Theme.of(context).colorScheme;
@@ -259,8 +260,8 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
           ),
         ),
         if (comment.replies.isNotEmpty)
-          ...comment.replies.map((reply) => _buildCommentTile(reply, isReply: true)),
+          ...comment.replies.asMap().entries.map((entry) => _buildCommentTile(entry.value, isReply: true)),
       ],
-    );
+    ).animate(delay: (index * 50).ms).fadeIn(duration: 400.ms).slideX(begin: 0.05, end: 0, curve: Curves.easeOut);
   }
 }

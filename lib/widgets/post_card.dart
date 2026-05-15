@@ -13,6 +13,7 @@ import '../screens/profile_screen.dart';
 import 'comment_bottom_sheet.dart';
 import 'media_grid.dart';
 import 'full_screen_media_viewer.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class PostCard extends StatelessWidget {
   final Post post;

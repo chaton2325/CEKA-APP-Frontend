@@ -13,6 +13,7 @@ import '../models/post.dart';
 import '../models/user.dart';
 import '../models/media.dart';
 import 'edit_profile_screen.dart';
+import 'create_post_screen.dart';
 import '../widgets/full_screen_media_viewer.dart';
 import '../widgets/skeleton_profile.dart';
 
@@ -190,6 +191,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => CreatePostScreen()),
+        ),
+        backgroundColor: colorScheme.primary,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: const Icon(Icons.add_rounded, size: 28),
+      ),
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -207,7 +219,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   icon: const Icon(Icons.edit_note_rounded),
                   onPressed: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+                    MaterialPageRoute(builder: (context) => EditProfileScreen()),
                   ),
                 ),
               PopupMenuButton<AppLanguage>(
@@ -311,7 +323,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             OutlinedButton(
                               onPressed: () => Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+                                MaterialPageRoute(builder: (context) => EditProfileScreen()),
                               ),
                               style: OutlinedButton.styleFrom(
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -340,7 +352,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         InkWell(
                           onTap: () => Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+                            MaterialPageRoute(builder: (context) => EditProfileScreen()),
                           ),
                           borderRadius: BorderRadius.circular(12),
                           child: Container(
