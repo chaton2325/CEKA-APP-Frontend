@@ -37,47 +37,181 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: _pages[_currentIndex],
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _pages,
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
+      bottomNavigationBar: _ModernNavBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
           setState(() => _currentIndex = index);
         },
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.home_outlined),
-            selectedIcon: const Icon(Icons.home_rounded),
-            label: context.tr('home'),
-          ),
-          NavigationDestination(
-            icon: Badge(
-              isLabelVisible: notificationProvider.unreadCount > 0,
-              label: Text('${notificationProvider.unreadCount}'),
-              child: const Icon(Icons.notifications_none_rounded),
-            ),
-            selectedIcon: const Icon(Icons.notifications_rounded),
-            label: context.tr('alerts'),
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.person_outline_rounded),
-            selectedIcon: const Icon(Icons.person_rounded),
-            label: context.tr('profile'),
-          ),
-        ],
+        unreadNotifications: notificationProvider.unreadCount,
       ),
       floatingActionButton: _currentIndex == 0 
-          ? FloatingActionButton.extended(
+          ? FloatingActionButton(
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const CreatePostScreen()),
               ),
-              icon: const Icon(Icons.add_rounded),
-              label: Text(context.tr('post')),
+              backgroundColor: colorScheme.primary,
+              foregroundColor: Colors.white,
+              elevation: 4,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: const Icon(Icons.add_rounded, size: 28),
             )
           : null,
+    );
+  }
+}
+
+class _ModernNavBar extends StatelessWidget {
+  final int currentIndex;
+  final Function(int) onTap;
+  final int unreadNotifications;
+
+  const _ModernNavBar({
+    required this.currentIndex,
+    required this.onTap,
+    required this.unreadNotifications,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.primary.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      padding: EdgeInsets.fromLTRB(16, 12, 16, bottomPadding > 0 ? bottomPadding : 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _NavBarItem(
+            icon: Icons.home_rounded,
+            outlineIcon: Icons.home_outlined,
+            label: context.tr('home'),
+            isSelected: currentIndex == 0,
+            onTap: () => onTap(0),
+            color: colorScheme.primary,
+          ),
+          _NavBarItem(
+            icon: Icons.notifications_rounded,
+            outlineIcon: Icons.notifications_none_rounded,
+            label: context.tr('alerts'),
+            isSelected: currentIndex == 1,
+            onTap: () => onTap(1),
+            color: colorScheme.primary,
+            badgeCount: unreadNotifications,
+          ),
+          _NavBarItem(
+            icon: Icons.person_rounded,
+            outlineIcon: Icons.person_outline_rounded,
+            label: context.tr('profile'),
+            isSelected: currentIndex == 2,
+            onTap: () => onTap(2),
+            color: colorScheme.primary,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NavBarItem extends StatelessWidget {
+  final IconData icon;
+  final IconData outlineIcon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final Color color;
+  final int badgeCount;
+
+  const _NavBarItem({
+    required this.icon,
+    required this.outlineIcon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+    required this.color,
+    this.badgeCount = 0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withOpacity(0.12) : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(
+                  isSelected ? icon : outlineIcon,
+                  color: isSelected ? color : Colors.grey.shade500,
+                  size: 26,
+                ),
+                if (badgeCount > 0)
+                  Positioned(
+                    right: -2,
+                    top: -2,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.redAccent,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        '$badgeCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            if (isSelected) ...[
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                  letterSpacing: -0.2,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
@@ -97,9 +231,15 @@ class _FeedPageState extends State<_FeedPage> {
     super.initState();
     _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<PostProvider>(context, listen: false).fetchPosts();
-      Provider.of<NotificationProvider>(context, listen: false).fetchNotifications();
+      _refreshData();
     });
+  }
+
+  Future<void> _refreshData() async {
+    await Provider.of<PostProvider>(context, listen: false).fetchPosts();
+    if (mounted) {
+      await Provider.of<NotificationProvider>(context, listen: false).fetchNotifications();
+    }
   }
 
   @override
@@ -141,49 +281,82 @@ class _FeedPageState extends State<_FeedPage> {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () async {
-          await postProvider.fetchPosts();
-          if (mounted) {
-            await Provider.of<NotificationProvider>(context, listen: false).fetchNotifications();
-          }
-        },
+        onRefresh: _refreshData,
         child: ListView.builder(
           controller: _scrollController,
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
-          itemCount: postProvider.isLoading && postProvider.posts.isEmpty 
-              ? 5 // Show 5 skeletons while loading initial data
-              : postProvider.posts.length + 1 + (postProvider.isLoadingMore ? 1 : 0),
+          itemCount: _calculateItemCount(postProvider),
           itemBuilder: (context, index) {
+            // Initial Loading Skeletons
             if (postProvider.isLoading && postProvider.posts.isEmpty) {
               if (index == 0) return const _FeedHeader();
               return const SkeletonPost();
             }
 
+            // Header is always at the top
             if (index == 0) {
               return const _FeedHeader();
             }
 
+            // Empty State (if not loading and no posts)
+            if (postProvider.posts.isEmpty && !postProvider.isLoading) {
+              return _buildEmptyState(context);
+            }
+
+            // Post Card
             final postIndex = index - 1;
-            if (postIndex >= postProvider.posts.length) {
-              return Container(
-                margin: const EdgeInsets.symmetric(vertical: 20),
-                height: 40,
-                child: Center(
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary.withOpacity(0.5)),
-                    ),
-                  ),
-                ),
+            if (postIndex < postProvider.posts.length) {
+              return PostCard(post: postProvider.posts[postIndex]);
+            }
+
+            // Loading More Indicator (Shimmer)
+            if (postProvider.isLoadingMore) {
+              return Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: const SkeletonPost(),
               );
             }
 
-            return PostCard(post: postProvider.posts[postIndex]);
+            return const SizedBox.shrink();
           },
         ),
+      ),
+    );
+  }
+
+  int _calculateItemCount(PostProvider provider) {
+    if (provider.isLoading && provider.posts.isEmpty) return 6; // Header + 5 skeletons
+    if (provider.posts.isEmpty && !provider.isLoading) return 2; // Header + Empty state
+    
+    int count = provider.posts.length + 1; // Posts + Header
+    if (provider.isLoadingMore) count++; // + Loading more
+    return count;
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 20),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.feed_outlined, size: 64, color: Colors.grey.shade300),
+          const SizedBox(height: 24),
+          Text(
+            context.tr('noPostsYet') ?? 'Aucune publication pour le moment',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.grey.shade400),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Soyez le premier à partager quelque chose !',
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+          ),
+          const SizedBox(height: 32),
+          TextButton.icon(
+            onPressed: _refreshData,
+            icon: const Icon(Icons.refresh_rounded),
+            label: const Text('Actualiser'),
+          ),
+        ],
       ),
     );
   }
