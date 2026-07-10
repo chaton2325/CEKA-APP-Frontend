@@ -189,18 +189,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_isLoading) return const Scaffold(body: SkeletonProfile());
     if (_user == null) return Scaffold(body: Center(child: Text(context.tr('userNotFound'))));
 
+    final navBarBottomPadding = MediaQuery.of(context).padding.bottom;
+
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => CreatePostScreen()),
+      floatingActionButton: Padding(
+        // Lift the FAB above the floating custom nav bar when shown as a Home tab.
+        padding: EdgeInsets.only(
+          bottom: 82 + (navBarBottomPadding > 0 ? navBarBottomPadding : 20),
         ),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: Colors.white,
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: const Icon(Icons.add_rounded, size: 28),
+        child: FloatingActionButton(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CreatePostScreen()),
+          ),
+          backgroundColor: colorScheme.primary,
+          foregroundColor: Colors.white,
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: const Icon(Icons.add_rounded, size: 28),
+        ),
       ),
       body: CustomScrollView(
         slivers: [

@@ -274,6 +274,7 @@ class _FeedPageState extends State<_FeedPage> {
   Widget build(BuildContext context) {
     final postProvider = Provider.of<PostProvider>(context);
     final colorScheme = Theme.of(context).colorScheme;
+    final navBarBottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -333,16 +334,22 @@ class _FeedPageState extends State<_FeedPage> {
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const CreatePostScreen()),
+      floatingActionButton: Padding(
+        // Lift the FAB above the floating custom nav bar (70px tall + its own bottom margin).
+        padding: EdgeInsets.only(
+          bottom: 82 + (navBarBottomPadding > 0 ? navBarBottomPadding : 20),
         ),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: Colors.white,
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: const Icon(Icons.add_rounded, size: 28),
+        child: FloatingActionButton(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const CreatePostScreen()),
+          ),
+          backgroundColor: colorScheme.primary,
+          foregroundColor: Colors.white,
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: const Icon(Icons.add_rounded, size: 28),
+        ),
       ),
     );
   }
