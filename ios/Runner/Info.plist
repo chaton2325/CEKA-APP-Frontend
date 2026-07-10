@@ -45,5 +45,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>CEKA a besoin d'accéder à votre appareil photo pour prendre une photo de profil ou de couverture.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>CEKA a besoin d'accéder à vos photos pour choisir une photo de profil ou de couverture.</string>
 </dict>
 </plist>

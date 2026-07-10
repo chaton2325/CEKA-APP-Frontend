@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/auth_provider.dart';
@@ -30,6 +32,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   User? _user;
   List<Post> _userPosts = [];
   bool _isLoading = true;
+  bool _uploadingProfilePhoto = false;
+  bool _uploadingBannerPhoto = false;
+  final _picker = ImagePicker();
 
   @override
   void initState() {
@@ -66,6 +71,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   int _getTotalLikes() {
     return _userPosts.fold(0, (sum, post) => sum + post.likesCount);
+  }
+
+  Future<ImageSource?> _showImageSourceSheet() {
+    return showModalBottomSheet<ImageSource>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            ListTile(
+              leading: const Icon(Icons.photo_camera_rounded),
+              title: Text(context.tr('takePhoto')),
+              onTap: () => Navigator.pop(sheetContext, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_rounded),
+              title: Text(context.tr('chooseFromGallery')),
+              onTap: () => Navigator.pop(sheetContext, ImageSource.gallery),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickAndUpdatePhoto(bool isProfilePhoto) async {
+    final source = await _showImageSourceSheet();
+    if (source == null || !mounted) return;
+
+    final pickedFile = await _picker.pickImage(source: source, imageQuality: 85);
+    if (pickedFile == null || !mounted) return;
+
+    setState(() {
+      if (isProfilePhoto) {
+        _uploadingProfilePhoto = true;
+      } else {
+        _uploadingBannerPhoto = true;
+      }
+    });
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final success = await authProvider.updateProfile(
+      profilePhoto: isProfilePhoto ? File(pickedFile.path) : null,
+      bannerPhoto: isProfilePhoto ? null : File(pickedFile.path),
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      if (isProfilePhoto) {
+        _uploadingProfilePhoto = false;
+      } else {
+        _uploadingBannerPhoto = false;
+      }
+      if (success) _user = authProvider.user;
+    });
+
+    if (!success) _showSnack(context.tr('updateFailed'));
   }
 
   void _showSnack(String message) {
@@ -221,89 +289,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _user!.username,
               style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
             ),
-            actions: [
-              if (isMe)
-                IconButton(
-                  icon: const Icon(Icons.edit_note_rounded),
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => EditProfileScreen()),
-                  ),
-                ),
-              PopupMenuButton<AppLanguage>(
-                tooltip: context.tr('language'),
-                icon: const Icon(Icons.translate_rounded),
-                onSelected: (language) => context.read<LanguageProvider>().setLanguage(language),
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: AppLanguage.fr,
-                    child: Text(context.tr('french')),
-                  ),
-                  PopupMenuItem(
-                    value: AppLanguage.en,
-                    child: Text(context.tr('english')),
-                  ),
-                ],
-              ),
-              if (isMe)
-                PopupMenuButton<String>(
-                  tooltip: context.tr('accountActions'),
-                  icon: const Icon(Icons.settings_outlined),
-                  onSelected: (value) {
-                    if (value == 'data_deletion') {
-                      _showDataDeletionRequestDialog();
-                    } else if (value == 'delete_account') {
-                      _showDeleteAccountDialog();
-                    } else if (value == 'logout') {
-                      authProvider.logout();
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: 'data_deletion',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.privacy_tip_outlined, size: 20),
-                          const SizedBox(width: 12),
-                          Expanded(child: Text(context.tr('requestDataDeletion'))),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'logout',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.logout_rounded, size: 20),
-                          const SizedBox(width: 12),
-                          Expanded(child: Text(context.tr('logout'))),
-                        ],
-                      ),
-                    ),
-                    const PopupMenuDivider(),
-                    PopupMenuItem(
-                      value: 'delete_account',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.delete_forever_outlined, size: 20, color: Colors.red),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              context.tr('deleteAccount'),
-                              style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-            ],
           ),
           SliverToBoxAdapter(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _ProfileHeader(user: _user!, postsCount: _userPosts.length, totalLikes: totalLikes),
+                _ProfileHeader(
+                  user: _user!,
+                  postsCount: _userPosts.length,
+                  totalLikes: totalLikes,
+                  isMe: isMe,
+                  uploadingProfilePhoto: _uploadingProfilePhoto,
+                  uploadingBannerPhoto: _uploadingBannerPhoto,
+                  onTapEditProfilePhoto: () => _pickAndUpdatePhoto(true),
+                  onTapEditBanner: () => _pickAndUpdatePhoto(false),
+                ),
                 const SizedBox(height: 24),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -327,7 +327,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ],
                             ),
                           ),
-                          if (isMe)
+                          if (isMe) ...[
+                            _ProfileSettingsButton(
+                              authProvider: authProvider,
+                              onShowDataDeletionDialog: _showDataDeletionRequestDialog,
+                              onShowDeleteAccountDialog: _showDeleteAccountDialog,
+                            ),
+                            const SizedBox(width: 8),
                             OutlinedButton(
                               onPressed: () => Navigator.push(
                                 context,
@@ -339,6 +345,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               child: Text(context.tr('edit')),
                             ),
+                          ],
                         ],
                       ),
                       const SizedBox(height: 20),
@@ -494,15 +501,136 @@ class _StatItem extends StatelessWidget {
   }
 }
 
+class _ProfileSettingsButton extends StatelessWidget {
+  final AuthProvider authProvider;
+  final VoidCallback onShowDataDeletionDialog;
+  final VoidCallback onShowDeleteAccountDialog;
+
+  const _ProfileSettingsButton({
+    required this.authProvider,
+    required this.onShowDataDeletionDialog,
+    required this.onShowDeleteAccountDialog,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: PopupMenuButton<String>(
+        tooltip: context.tr('accountActions'),
+        icon: Icon(Icons.settings_outlined, color: colorScheme.onSurface),
+        onSelected: (value) {
+          if (value == 'lang_fr') {
+            context.read<LanguageProvider>().setLanguage(AppLanguage.fr);
+          } else if (value == 'lang_en') {
+            context.read<LanguageProvider>().setLanguage(AppLanguage.en);
+          } else if (value == 'data_deletion') {
+            onShowDataDeletionDialog();
+          } else if (value == 'delete_account') {
+            onShowDeleteAccountDialog();
+          } else if (value == 'logout') {
+            authProvider.logout();
+          }
+        },
+        itemBuilder: (context) {
+          final isFrench = context.read<LanguageProvider>().isFrench;
+          return [
+            PopupMenuItem(
+              value: 'lang_fr',
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.check_rounded,
+                    size: 18,
+                    color: isFrench ? colorScheme.primary : Colors.transparent,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(context.tr('french'))),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 'lang_en',
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.check_rounded,
+                    size: 18,
+                    color: !isFrench ? colorScheme.primary : Colors.transparent,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(context.tr('english'))),
+                ],
+              ),
+            ),
+            const PopupMenuDivider(),
+            PopupMenuItem(
+              value: 'data_deletion',
+              child: Row(
+                children: [
+                  const Icon(Icons.privacy_tip_outlined, size: 20),
+                  const SizedBox(width: 12),
+                  Expanded(child: Text(context.tr('requestDataDeletion'))),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 'logout',
+              child: Row(
+                children: [
+                  const Icon(Icons.logout_rounded, size: 20),
+                  const SizedBox(width: 12),
+                  Expanded(child: Text(context.tr('logout'))),
+                ],
+              ),
+            ),
+            const PopupMenuDivider(),
+            PopupMenuItem(
+              value: 'delete_account',
+              child: Row(
+                children: [
+                  const Icon(Icons.delete_forever_outlined, size: 20, color: Colors.red),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      context.tr('deleteAccount'),
+                      style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ];
+        },
+      ),
+    );
+  }
+}
+
 class _ProfileHeader extends StatelessWidget {
   final User user;
   final int postsCount;
   final int totalLikes;
+  final bool isMe;
+  final bool uploadingProfilePhoto;
+  final bool uploadingBannerPhoto;
+  final VoidCallback onTapEditProfilePhoto;
+  final VoidCallback onTapEditBanner;
 
   const _ProfileHeader({
     required this.user,
     required this.postsCount,
     required this.totalLikes,
+    required this.isMe,
+    required this.uploadingProfilePhoto,
+    required this.uploadingBannerPhoto,
+    required this.onTapEditProfilePhoto,
+    required this.onTapEditBanner,
   });
 
   @override
@@ -571,6 +699,16 @@ class _ProfileHeader extends StatelessWidget {
               ),
             ),
           ),
+          if (isMe)
+            Positioned(
+              right: 24,
+              top: 16,
+              child: _PhotoEditBadge(
+                icon: Icons.camera_alt_rounded,
+                loading: uploadingBannerPhoto,
+                onTap: onTapEditBanner,
+              ),
+            ),
           Positioned(
             left: 32,
             bottom: 0,
@@ -580,26 +718,42 @@ class _ProfileHeader extends StatelessWidget {
                 color: Colors.white,
                 shape: BoxShape.circle,
               ),
-              child: GestureDetector(
-                onTap: user.profilePhotoUrl != null ? () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => FullScreenMediaViewer(
-                      media: [Media(id: 0, url: user.profilePhotoUrl!, mediaType: MediaType.image, filename: 'profile.jpg', position: 0)],
-                      initialIndex: 0,
-                    )),
-                  );
-                } : null,
-                child: CircleAvatar(
-                  radius: 50,
-                  backgroundColor: colorScheme.surfaceVariant,
-                  backgroundImage: user.profilePhotoUrl != null
-                      ? NetworkImage('${AppConstants.baseUrl}${user.profilePhotoUrl}')
-                      : null,
-                  child: user.profilePhotoUrl == null
-                      ? Icon(Icons.person_rounded, size: 50, color: colorScheme.primary)
-                      : null,
-                ),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  GestureDetector(
+                    onTap: user.profilePhotoUrl != null ? () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => FullScreenMediaViewer(
+                          media: [Media(id: 0, url: user.profilePhotoUrl!, mediaType: MediaType.image, filename: 'profile.jpg', position: 0)],
+                          initialIndex: 0,
+                        )),
+                      );
+                    } : null,
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundColor: colorScheme.surfaceVariant,
+                      backgroundImage: user.profilePhotoUrl != null
+                          ? NetworkImage('${AppConstants.baseUrl}${user.profilePhotoUrl}')
+                          : null,
+                      child: user.profilePhotoUrl == null
+                          ? Icon(Icons.person_rounded, size: 50, color: colorScheme.primary)
+                          : null,
+                    ),
+                  ),
+                  if (isMe)
+                    Positioned(
+                      right: -4,
+                      bottom: -4,
+                      child: _PhotoEditBadge(
+                        icon: Icons.edit_rounded,
+                        size: 30,
+                        loading: uploadingProfilePhoto,
+                        onTap: onTapEditProfilePhoto,
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
@@ -615,6 +769,51 @@ class _ProfileHeader extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _PhotoEditBadge extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  final double size;
+  final bool loading;
+
+  const _PhotoEditBadge({
+    required this.icon,
+    required this.onTap,
+    this.size = 34,
+    this.loading = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return GestureDetector(
+      onTap: loading ? null : onTap,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: colorScheme.primary,
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.25),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: loading
+            ? Padding(
+                padding: EdgeInsets.all(size * 0.22),
+                child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+              )
+            : Icon(icon, color: Colors.white, size: size * 0.5),
       ),
     );
   }

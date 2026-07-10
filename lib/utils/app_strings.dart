@@ -225,6 +225,14 @@ class AppStrings {
       AppLanguage.fr: 'Mise à jour échouée',
       AppLanguage.en: 'Update failed',
     },
+    'takePhoto': {
+      AppLanguage.fr: 'Prendre une photo',
+      AppLanguage.en: 'Take a photo',
+    },
+    'chooseFromGallery': {
+      AppLanguage.fr: 'Choisir dans la galerie',
+      AppLanguage.en: 'Choose from gallery',
+    },
     'newPublication': {
       AppLanguage.fr: 'Nouvelle publication',
       AppLanguage.en: 'New Publication',
