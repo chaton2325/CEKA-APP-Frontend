@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/post_provider.dart';
 import '../providers/auth_provider.dart';
+import '../utils/constants.dart';
 import '../widgets/post_card.dart';
 import '../widgets/skeleton_post.dart';
 import 'create_post_screen.dart';
@@ -279,18 +280,30 @@ class _FeedPageState extends State<_FeedPage> {
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        title: const Text('CEKA'),
+        backgroundColor: colorScheme.surface,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        titleSpacing: 20,
+        title: Text(
+          'CEKA',
+          style: TextStyle(
+            color: colorScheme.primary,
+            fontWeight: FontWeight.w900,
+            fontSize: 26,
+            letterSpacing: -1,
+          ),
+        ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.search_rounded),
-            onPressed: () {
+          _CircleIconButton(
+            icon: Icons.search_rounded,
+            onTap: () {
               showSearch(
                 context: context,
                 delegate: UserSearchDelegate(Provider.of<AuthProvider>(context, listen: false).apiService),
               );
             },
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 16),
         ],
       ),
       body: RefreshIndicator(
@@ -302,13 +315,13 @@ class _FeedPageState extends State<_FeedPage> {
           itemBuilder: (context, index) {
             // Initial Loading Skeletons
             if (postProvider.isLoading && postProvider.posts.isEmpty) {
-              if (index == 0) return const _FeedHeader();
+              if (index == 0) return const _ComposerCard();
               return const SkeletonPost();
             }
 
             // Header is always at the top
             if (index == 0) {
-              return const _FeedHeader();
+              return const _ComposerCard();
             }
 
             // Empty State (if not loading and no posts)
@@ -392,8 +405,32 @@ class _FeedPageState extends State<_FeedPage> {
   }
 }
 
-class _FeedHeader extends StatelessWidget {
-  const _FeedHeader();
+class _CircleIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _CircleIconButton({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        width: 38,
+        height: 38,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF0F2F5),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, size: 20, color: const Color(0xFF102118)),
+      ),
+    );
+  }
+}
+
+class _ComposerCard extends StatelessWidget {
+  const _ComposerCard();
 
   Future<void> _launchTicketUrl(BuildContext context) async {
     const url = 'https://www.ebyaceka.org/register/form';
@@ -414,98 +451,128 @@ class _FeedHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final user = Provider.of<AuthProvider>(context, listen: false).user;
 
-    return Column(
-      children: [
-        Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [colorScheme.primary, colorScheme.secondary],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: colorScheme.primary.withOpacity(0.2),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
-              ),
-            ],
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-          child: Row(
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
             children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(Icons.eco_rounded, color: Colors.white, size: 28),
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: colorScheme.primary.withOpacity(0.1),
+                backgroundImage: user?.profilePhotoUrl != null
+                    ? NetworkImage('${AppConstants.baseUrl}${user!.profilePhotoUrl}')
+                    : null,
+                child: user?.profilePhotoUrl == null
+                    ? Icon(Icons.person_rounded, color: colorScheme.primary)
+                    : null,
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.tr('communityFeed'),
-                      style: const TextStyle(
-                        color: Colors.white, 
-                        fontSize: 20, 
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.5,
-                      ),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(24),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CreatePostScreen()),
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF0F2F5),
+                      borderRadius: BorderRadius.circular(24),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      context.tr('feedSubtitle'),
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.9), 
-                        fontSize: 13, 
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        InkWell(
-          onTap: () => _launchTicketUrl(context),
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: colorScheme.tertiary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: colorScheme.tertiary.withOpacity(0.2)),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.confirmation_number_rounded, color: colorScheme.tertiary),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    context.tr('buyTicket'),
-                    style: TextStyle(
-                      color: colorScheme.tertiary,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
+                    child: Text(
+                      context.tr('shareSomething'),
+                      style: TextStyle(color: Colors.grey.shade600, fontSize: 15),
                     ),
                   ),
                 ),
-                Icon(Icons.arrow_forward_ios_rounded, size: 16, color: colorScheme.tertiary),
-              ],
-            ),
+              ),
+            ],
           ),
+          const SizedBox(height: 12),
+          Divider(height: 1, color: Colors.grey.shade100),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Expanded(
+                child: _ComposerAction(
+                  icon: Icons.photo_library_rounded,
+                  label: context.tr('media'),
+                  color: colorScheme.primary,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CreatePostScreen()),
+                  ),
+                ),
+              ),
+              Container(width: 1, height: 26, color: Colors.grey.shade200),
+              Expanded(
+                child: _ComposerAction(
+                  icon: Icons.confirmation_number_rounded,
+                  label: context.tr('buyTicket'),
+                  color: colorScheme.tertiary,
+                  onTap: () => _launchTicketUrl(context),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ComposerAction extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _ComposerAction({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 20, color: color),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                label,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: color, fontWeight: FontWeight.w700, fontSize: 13),
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

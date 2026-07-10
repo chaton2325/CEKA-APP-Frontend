@@ -213,37 +213,74 @@ class PostCard extends StatelessWidget {
                   )).toList(),
                 ),
               ],
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
+              if (post.likesCount > 0 || post.comments.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      if (post.likesCount > 0) ...[
+                        Container(
+                          width: 18,
+                          height: 18,
+                          decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                          child: const Icon(Icons.favorite_rounded, size: 11, color: Colors.white),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${post.likesCount}',
+                          style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                      const Spacer(),
+                      if (post.comments.isNotEmpty)
+                        Row(
+                          children: [
+                            Icon(Icons.mode_comment_rounded, size: 14, color: Colors.grey.shade500),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${post.comments.length}',
+                              style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+              Divider(height: 1, color: Colors.grey.shade100),
+              const SizedBox(height: 4),
               Row(
                 children: [
-                  _ActionButton(
-                    icon: isLiked ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
-                    label: '${post.likesCount}',
-                    color: isLiked ? Colors.red : Colors.grey.shade700,
-                    activeColor: Colors.red,
-                    isActive: isLiked,
-                    onTap: () => postProvider.togglePostLike(post.id, isLiked, userId: authProvider.user?.id),
+                  Expanded(
+                    child: _FbActionButton(
+                      icon: isLiked ? Icons.thumb_up_rounded : Icons.thumb_up_outlined,
+                      label: context.tr('likeAction'),
+                      color: isLiked ? colorScheme.primary : Colors.grey.shade700,
+                      onTap: () => postProvider.togglePostLike(post.id, isLiked, userId: authProvider.user?.id),
+                    ),
                   ),
-                  const SizedBox(width: 12),
-                  _ActionButton(
-                    icon: Icons.mode_comment_outlined,
-                    label: '${post.comments.length}',
-                    color: Colors.grey.shade700,
-                    onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (context) => CommentBottomSheet(postId: post.id, initialComments: post.comments),
-                      );
-                    },
+                  Expanded(
+                    child: _FbActionButton(
+                      icon: Icons.mode_comment_outlined,
+                      label: context.tr('commentAction'),
+                      color: Colors.grey.shade700,
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) => CommentBottomSheet(postId: post.id, initialComments: post.comments),
+                        );
+                      },
+                    ),
                   ),
-                  const Spacer(),
-                  IconButton(
-                    icon: Icon(Icons.share_rounded, color: Colors.grey.shade600, size: 20),
-                    onPressed: () {},
-                    constraints: const BoxConstraints(),
-                    padding: const EdgeInsets.all(8),
+                  Expanded(
+                    child: _FbActionButton(
+                      icon: Icons.share_outlined,
+                      label: context.tr('shareAction'),
+                      color: Colors.grey.shade700,
+                      onTap: () {},
+                    ),
                   ),
                 ],
               ),
@@ -255,43 +292,37 @@ class PostCard extends StatelessWidget {
   }
 }
 
-class _ActionButton extends StatelessWidget {
+class _FbActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
-  final Color? activeColor;
-  final bool isActive;
   final VoidCallback onTap;
 
-  const _ActionButton({
+  const _FbActionButton({
     required this.icon,
     required this.label,
     required this.color,
-    this.activeColor,
-    this.isActive = false,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final finalColor = isActive ? (activeColor ?? color) : color;
-    
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-        decoration: BoxDecoration(
-          color: isActive ? finalColor.withOpacity(0.08) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-        ),
+      borderRadius: BorderRadius.circular(10),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 20, color: finalColor),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: TextStyle(color: finalColor, fontWeight: FontWeight.w800, fontSize: 14),
+            Icon(icon, size: 19, color: color),
+            const SizedBox(width: 7),
+            Flexible(
+              child: Text(
+                label,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: color, fontWeight: FontWeight.w700, fontSize: 13.5),
+              ),
             ),
           ],
         ),
